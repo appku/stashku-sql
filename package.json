@@ -1,0 +1,54 @@
+{
+    "name": "@appku/stashku-sql",
+    "version": "0.4.11",
+    "description": "A SQL storage engine for StashKu. Allows RESTful queries to popular SQL databases.",
+    "repository": {
+        "type": "git",
+        "url": "git@git-going.office.append.media:append/stashku-sql.git"
+    },
+    "author": "Append Media, LLC",
+    "license": "SEE LICENSE IN LICENSE",
+    "keywords": [
+        "stashku",
+        "sql",
+        "mssql",
+        "database"
+    ],
+    "type": "module",
+    "main": "sql-storage-engine.js",
+    "scripts": {
+        "start": "node index.js",
+        "start-docs": "node cli.js ./docs",
+        "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --verbose --coverage",
+        "test-ci": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --verbose -ci",
+        "lint": "./node_modules/.bin/eslint ./",
+        "docs": "./node_modules/jsdoc/jsdoc.js -c jsdoc.json --readme README.md"
+    },
+    "jest": {
+        "testEnvironment": "node",
+        "testPathIgnorePatterns": [
+            "/node_modules/"
+        ]
+    },
+    "husky": {
+        "hooks": {
+            "pre-commit": "npm run test && npm run lint"
+        }
+    },
+    "dependencies": {
+        "@appku/stashku": "^0.3.27",
+        "rhino": "^5.3.7"
+    },
+    "optionalDependencies": {},
+    "devDependencies": {
+        "@types/jest": "^25.2.3",
+        "dotenv": "^8.2.0",
+        "eslint": "^6.8.0",
+        "eslint-plugin-jest": "^23.20.0",
+        "husky": "^4.3.0",
+        "jest": "^25.5.4",
+        "jsdoc": "^3.6.6",
+        "jsdoc-plugin-intersection": "^1.0.3",
+        "tidy-jsdoc": "^1.4.0"
+    }
+}

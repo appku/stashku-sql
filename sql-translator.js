@@ -316,8 +316,8 @@ export default class SQLTranslator {
                     }
                 }
                 return qs;
-            } else if (filter.field && filter.op) {
-                let col = SQLTranslator.identifier(filter.field);
+            } else if (filter.property && filter.op) {
+                let col = SQLTranslator.identifier(filter.property);
                 let param = null;
                 if (filter.op !== Filter.OP.ISNULL
                     && filter.op !== Filter.OP.ISNOTNULL

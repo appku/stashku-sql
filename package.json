@@ -36,17 +36,16 @@
         }
     },
     "dependencies": {
-        "@appku/stashku": "^0.3.27",
-        "rhino": "^5.3.7"
+        "@appku/stashku": "^0.4.3",
+        "rhino": "^5.4.0"
     },
-    "optionalDependencies": {},
     "devDependencies": {
-        "@types/jest": "^25.2.3",
-        "dotenv": "^8.2.0",
-        "eslint": "^6.8.0",
-        "eslint-plugin-jest": "^23.20.0",
+        "@types/jest": "^27.0.3",
+        "dotenv": "^10.0.0",
+        "eslint": "^8.4.1",
+        "eslint-plugin-jest": "^25.3.0",
         "husky": "^4.3.0",
-        "jest": "^25.5.4",
+        "jest": "^27.4.3",
         "jsdoc": "^3.6.6",
         "jsdoc-plugin-intersection": "^1.0.3",
         "tidy-jsdoc": "^1.4.0"

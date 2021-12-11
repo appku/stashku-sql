@@ -7,7 +7,8 @@ import StashKu, {
     BaseStorageEngine,
     Filter,
     Response,
-    RESTError
+    RESTError,
+    ModelConfiguration
 } from '@appku/stashku';
 import rhino from 'rhino';
 import SQLTypes from './sql-types.js';
@@ -552,6 +553,63 @@ class SQLStorageEngine extends BaseStorageEngine {
         res.affected = res.total;
         res.returned = res.total;
         return res;
+    }
+
+    /**
+     * @inheritdoc
+     * @override
+     * @throws 404 Error when the requested resource is has not been stored in memory.
+     * @param {OptionsRequest} request - The OPTIONS request to send to the storage engine.
+     * @returns {Response} Returns a response with a single data object- the dynamically created model configuration.
+     */
+    async options(request) {
+        //validate
+        await super.options(request);
+        let meta = request.metadata;
+        let from = this.resourceOf(request);
+        if (this.data.has(from) === false) {
+            throw new RESTError(404, `The requested resource "${meta.from}" was not found.`);
+        }
+        let properties = new Map();
+        let matches = this.data.get(from);
+        //find properties - evaluate all records in resource
+        for (let m of matches) {
+            let keys = Object.keys(m);
+            for (let k of keys) {
+                let isNullOrUndefined = (m[k] === null || typeof m[k] === 'undefined');
+                if (properties.has(k) === false) {
+                    properties.set(k, { 
+                        target: k,
+                        type: m[k]?.constructor?.name || null,
+                        nullable: isNullOrUndefined
+                    });
+                } else {
+                    let v = properties.get(k);
+                    if (v.nullable === false && isNullOrUndefined) {
+                        v.nullable = true;
+                    }
+                }
+            }
+        }
+        //set defaults on non-null types
+        for (let [k, v] of properties) {
+            if (v.nullable === false) {
+                switch (v.type) {
+                    case 'Number': v.default = 0; break;
+                    case 'String': v.default = ''; break;
+                    case 'Boolean': v.default = false; break;
+                    case 'Array': v.default = []; break;
+                    case 'Date': v.default = new Date(); break;
+                    case 'Map': v.default = new Map(); break;
+                    case 'Set': v.default = new Set(); break;
+                    case 'Buffer': v.default = Buffer.alloc(0); break;
+                    case 'ArrayBuffer': v.default = new ArrayBuffer(0); break;
+                }
+            }
+        }
+        //generate model type and return
+        // let mt = ModelUtility.generateModelType(meta.from, properties, new ModelConfiguration(from));
+        // return new Response([mt], 1, 0, 1);
     }
 
 }

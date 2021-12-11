@@ -1,18 +1,18 @@
 SELECT 
-    isc.Table_Catalog AS [catalog],
-    isc.Table_Schema AS [schema],
-    isc.Table_Name AS [name],
-    isc.Column_Name AS [property],
+    isc.TABLE_CATALOG AS [catalog],
+    isc.TABLE_SCHEMA AS [schema],
+    isc.TABLE_NAME AS [name],
+    isc.COLUMN_NAME AS [property],
     CAST(ISNULL(con.Keyed, 0) AS BIT) AS keyed,
-    isc.Ordinal_Position AS position,
+    isc.ORDINAL_POSITION AS position,
     CAST((CASE
-        WHEN isc.Is_Nullable LIKE 'Y%' THEN 1
+        WHEN isc.IS_NULLABLE LIKE 'Y%' THEN 1
         ELSE 0
     END) AS BIT) AS nullable,
-    isc.Data_Type AS dataType,
+    isc.DATA_TYPE AS dataType,
     isc.CHARACTER_MAXIMUM_LENGTH AS charLength,
-    isc.Numeric_Precision AS numberPrecision,
-    isc.Numeric_Precision_Radix AS numberRadix
+    isc.NUMERIC_PRECISION AS numberPrecision,
+    isc.NUMERIC_PRECISION_RADIX AS numberRadix
     FROM INFORMATION_SCHEMA.COLUMNS isc
         OUTER APPLY (
             SELECT TOP 1 (1) AS Keyed

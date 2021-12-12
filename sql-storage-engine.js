@@ -4,18 +4,23 @@ import StashKu, {
     PutRequest,
     PatchRequest,
     DeleteRequest,
+    OptionsRequest,
     BaseStorageEngine,
     Filter,
     Response,
     RESTError,
-    ModelConfiguration
+    ModelConfiguration,
+    ModelUtility
 } from '@appku/stashku';
 import rhino from 'rhino';
 import SQLTypes from './sql-types.js';
 import QuerySegment from './query-segment.js';
 import SQLTranslator from './sql-translator.js';
+import fs from 'fs/promises';
 
 const SUPPORTED_DRIVERS = ['sql-server'];
+const OPTIONS_QUERY = await fs.readFile('./templates/options.sql', 'utf8');
+const RESOURCES_QUERY = await fs.readFile('./templates/resources.sql', 'utf8');
 
 /**
  * @typedef SQLStorageAuthenticationConfiguration
@@ -173,12 +178,8 @@ class SQLStorageEngine extends BaseStorageEngine {
      * @returns {Array.<String>}
      */
     async resources() {
-        let names = await this.raw(
-            `SELECT TABLE_SCHEMA, TABLE_NAME 
-                FROM INFORMATION_SCHEMA.TABLES 
-                WHERE TABLE_NAME NOT LIKE '__%' ESCAPE '_';`
-        );
-        return names.map(v => `${SQLTranslator.identifier(v.TABLE_SCHEMA)}.${SQLTranslator.identifier(v.TABLE_NAME)}.`);
+        let names = await this.raw(RESOURCES_QUERY);
+        return names.map(v => `${SQLTranslator.identifier(v.schema)}.${SQLTranslator.identifier(v.name)}`);
     }
 
     /**
@@ -565,51 +566,46 @@ class SQLStorageEngine extends BaseStorageEngine {
     async options(request) {
         //validate
         await super.options(request);
+        //get information
         let meta = request.metadata;
-        let from = this.resourceOf(request);
-        if (this.data.has(from) === false) {
+        let properties = new Map();
+        let columns = await this.raw(OPTIONS_QUERY, { resource: meta.from });
+        if (columns && columns.length) {
+            for (let col of columns) {
+                if (properties.has(col.property) === false) {
+                    let def = {
+                        target: col.property,
+                        type: SQLTranslator.toJSTypeName(col.dataType),
+                        nullable: col.nullable
+                    };
+                    if (col.keyed) {
+                        def.pk = true;
+                    }
+                    if (col.hasDefault) {
+                        def.omitnull = true;
+                    }
+                    if (!def.pk && def.nullable === false && !def.omitnull) {
+                        switch (def.type) {
+                            case 'Number': def.default = 0; break;
+                            case 'String': def.default = ''; break;
+                            case 'Boolean': def.default = false; break;
+                            case 'Array': def.default = []; break;
+                            case 'Date': def.default = new Date(); break;
+                            case 'Map': def.default = new Map(); break;
+                            case 'Set': def.default = new Set(); break;
+                            case 'Buffer': def.default = Buffer.alloc(0); break;
+                            case 'ArrayBuffer': def.default = new ArrayBuffer(0); break;
+                        }
+                    }
+                    properties.set(ModelUtility.formatPropName(col.property), def);
+                }
+            }
+        } else {
             throw new RESTError(404, `The requested resource "${meta.from}" was not found.`);
         }
-        let properties = new Map();
-        let matches = this.data.get(from);
-        //find properties - evaluate all records in resource
-        for (let m of matches) {
-            let keys = Object.keys(m);
-            for (let k of keys) {
-                let isNullOrUndefined = (m[k] === null || typeof m[k] === 'undefined');
-                if (properties.has(k) === false) {
-                    properties.set(k, { 
-                        target: k,
-                        type: m[k]?.constructor?.name || null,
-                        nullable: isNullOrUndefined
-                    });
-                } else {
-                    let v = properties.get(k);
-                    if (v.nullable === false && isNullOrUndefined) {
-                        v.nullable = true;
-                    }
-                }
-            }
-        }
-        //set defaults on non-null types
-        for (let [k, v] of properties) {
-            if (v.nullable === false) {
-                switch (v.type) {
-                    case 'Number': v.default = 0; break;
-                    case 'String': v.default = ''; break;
-                    case 'Boolean': v.default = false; break;
-                    case 'Array': v.default = []; break;
-                    case 'Date': v.default = new Date(); break;
-                    case 'Map': v.default = new Map(); break;
-                    case 'Set': v.default = new Set(); break;
-                    case 'Buffer': v.default = Buffer.alloc(0); break;
-                    case 'ArrayBuffer': v.default = new ArrayBuffer(0); break;
-                }
-            }
-        }
         //generate model type and return
-        // let mt = ModelUtility.generateModelType(meta.from, properties, new ModelConfiguration(from));
-        // return new Response([mt], 1, 0, 1);
+        let mt = ModelUtility.generateModelType(meta.from, properties, new ModelConfiguration(meta.from));
+        return new Response([mt], 1, 0, 1);
     }
 
 }

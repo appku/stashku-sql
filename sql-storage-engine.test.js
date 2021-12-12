@@ -1,6 +1,6 @@
 import SQLStorageEngine from './sql-storage-engine.js';
 import SQLTypes from './sql-types.js';
-import { GetRequest, PostRequest, PutRequest, PatchRequest, DeleteRequest, Filter, Response } from '@appku/stashku';
+import { GetRequest, PostRequest, PutRequest, PatchRequest, DeleteRequest, OptionsRequest, Filter, Response, ModelConfiguration } from '@appku/stashku';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -11,15 +11,18 @@ describe('#constructor', () => {
     });
 });
 
-// describe('#resources', () => {
-//     it('gets a list of table and view names.', async () => {
-//         let e = new SQLStorageEngine();
-//         e.configure();
-//         let names = await e.resources();
-//         expect(names.length).toBeGreaterThan(0);
-//         await e.destroy();
-//     });
-// });
+describe('#resources', () => {
+    it('gets a list of table and view names.', async () => {
+        let e = new SQLStorageEngine();
+        e.configure();
+        let names = await e.resources();
+        expect(names.length).toBeGreaterThan(0);
+        for (let n of names) {
+            expect(n).toMatch(/.+\..+/i);
+        }
+        await e.destroy();
+    });
+});
 
 // describe('#bulk', () => {
 //     it('bulk inserts rows into a table.', async () => {
@@ -185,7 +188,7 @@ describe('#constructor', () => {
 //         e.configure();
 //         let results = await e.put(new PutRequest()
 //             .to('Production.Product')
-//             .keys('ProductID')
+//             .pk('ProductID')
 //             .objects(
 //                 {
 //                     ProductID: 1,
@@ -250,3 +253,34 @@ describe('#constructor', () => {
 //         expect(results.total).toBe(300);
 //     });
 // });
+
+describe('#options', () => {
+    let e = new SQLStorageEngine();
+    e.configure();
+    afterAll(()=>{
+        e.destroy();
+    });
+    it('throws a 404 when an invalid resource is specified.', async () => {
+        expect.assertions(2);
+        try {
+            await e.options(new OptionsRequest()
+                .from('test')
+            );
+        } catch (err) {
+            expect(err.toString()).toMatch(/resource.+not found/i);
+            expect(err.code).toBe(404);
+        }
+    });
+    it('returns a model type with a proper model configuration.', async () => {
+        let res = await e.options(new OptionsRequest('Person.Person'));
+        expect(res.code).toBe(200);
+        expect(res.data.length).toBe(1);
+        expect(res.data[0].name).toBe('PersonPersonModel');
+        expect(res.data[0].businessEntityID.target).toBe('BusinessEntityID');
+        expect(res.data[0].businessEntityID.pk).toBeTruthy();
+        expect(res.data[0].businessEntityID.default).toBeUndefined();
+        expect(res.data[0].firstName.target).toBe('FirstName');
+        expect(res.data[0].firstName.default).toBe('');
+        expect(res.data[0].$stashku).toBeInstanceOf(ModelConfiguration);
+    });
+});

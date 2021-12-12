@@ -24,6 +24,44 @@ describe('.integer', () => {
     });
 });
 
+describe('.toJSTypeName', () => {
+    it('returns "Boolean" for numeric types.', () => {
+        expect(SQLTranslator.toJSTypeName('bit')).toBe('Boolean');
+    });
+    it('returns "Number" for numeric types.', () => {
+        [
+            'tinyint', 'smallint', 'int',
+            'integer', 'numeric', 'decimal',
+            'smallmoney', 'float', 'real',
+            'money'
+        ].forEach(v => expect(SQLTranslator.toJSTypeName(v)).toBe('Number'));
+    });
+    it('returns "Date" for numeric types.', () => {
+        [
+            'smalldatetime', 'datetime', 'datetime2',
+            'datetimeoffset', 'date', 'time'
+        ].forEach(v => expect(SQLTranslator.toJSTypeName(v)).toBe('Date'));
+    });
+    it('returns "Buffer" for numeric types.', () => {
+        [
+            'binary', 'image', 'varbinary',
+            'udt'
+        ].forEach(v => expect(SQLTranslator.toJSTypeName(v)).toBe('Buffer'));
+    });
+    it('returns "String" for numeric types.', () => {
+        [
+            'bigint', 'nchar', 'char',
+            'nvarchar', 'varchar', 'ntext',
+            'text', 'uniqueidentifier', 'xml'
+        ].forEach(v => expect(SQLTranslator.toJSTypeName(v)).toBe('String'));
+    });
+    it('throws an Error on unknown type name.', () => {
+        [
+            'squiggles', null, 34323, new Date()
+        ].forEach(v => expect(() => SQLTranslator.toJSTypeName(v)).toThrow());
+    });
+});
+
 describe('.raw', () => {
     it('returns null when the query segment is null or undefined.', () => {
         expect(SQLTranslator.raw()).toBeNull();

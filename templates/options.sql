@@ -9,7 +9,11 @@ SELECT
         WHEN isc.IS_NULLABLE LIKE 'Y%' THEN 1
         ELSE 0
     END) AS BIT) AS nullable,
-    isc.DATA_TYPE AS dataType,
+    CAST((CASE
+        WHEN isc.COLUMN_DEFAULT IS NOT NULL THEN 1
+        ELSE 0
+    END) AS BIT) AS hasDefault,
+    UPPER(isc.DATA_TYPE) AS dataType,
     isc.CHARACTER_MAXIMUM_LENGTH AS charLength,
     isc.NUMERIC_PRECISION AS numberPrecision,
     isc.NUMERIC_PRECISION_RADIX AS numberRadix

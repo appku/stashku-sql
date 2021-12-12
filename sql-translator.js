@@ -30,6 +30,30 @@ export default class SQLTranslator {
     }
 
     /**
+     * Returns the JavaScript constructor (type) name used when the underlying driver yields results from the database
+     * to Node. For example, when an `"INTEGER"` SQL type is specified, the value `"Number"` is returned. 
+     * @param {String} sqlTypeName - The SQL data type name, such as `"DATETIME"`, `"BIT"`, etc.
+     * @param {String} [driver] - The StashKu-SQL driver name, to be used for situations of differing dialects.
+     * @returns {String}
+     */
+    static toJSTypeName(sqlTypeName, driver) {
+        if (sqlTypeName) {
+            if (sqlTypeName.match(/^bit$/i)) {
+                return 'Boolean';
+            } else if (sqlTypeName.match(/^(?:tinyint|smallint|int(eger)?|numeric|decimal|smallmoney|float|real|money)$/i)) {
+                return 'Number';
+            } else if (sqlTypeName.match(/^(?:smalldatetime|datetime.?|datetimeoffset|date|time)$/i)) {
+                return 'Date';
+            } else if (sqlTypeName.match(/^(?:binary|image|varbinary|udt)$/i)) {
+                return 'Buffer';
+            } else if (sqlTypeName.match(/^(?:bigint|n?char|n?varchar|n?text|uniqueidentifier|xml)$/i)) {
+                return 'String';
+            }
+        }
+        throw new Error(`Unknown or unsupported data type "${sqlTypeName}" translation to a JavaScript type.`);
+    }
+
+    /**
      * Convert a parameterized query (`QuerySegment`) into a raw SQL query string (escaped).
      * @param {QuerySegment} segment - The segment to convert.
      * @returns {String}
@@ -49,7 +73,7 @@ export default class SQLTranslator {
      * Converts a value into a SQL (raw) string representation.
      * @throws Error when the value type is not supported.
      * @param {*} value - The value to be converted into the SQL (raw) equivalent.
-     * @param {String} driver - The StashKu-SQL driver name, to be used for situations of differing dialects.
+     * @param {String} [driver] - The StashKu-SQL driver name, to be used for situations of differing dialects.
      * @returns {String}
      */
     static escape(value, driver) {

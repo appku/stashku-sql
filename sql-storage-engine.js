@@ -16,11 +16,11 @@ import rhino from 'rhino';
 import SQLTypes from './sql-types.js';
 import QuerySegment from './query-segment.js';
 import SQLTranslator from './sql-translator.js';
-import fs from 'fs/promises';
+import fs from 'fs';
 
 const SUPPORTED_DRIVERS = ['sql-server'];
-const OPTIONS_QUERY = await fs.readFile('./templates/options.sql', 'utf8');
-const RESOURCES_QUERY = await fs.readFile('./templates/resources.sql', 'utf8');
+const OPTIONS_QUERY = fs.readFileSync('./templates/options.sql', 'utf8');
+const RESOURCES_QUERY = fs.readFileSync('./templates/resources.sql', 'utf8');
 
 /**
  * @typedef SQLStorageAuthenticationConfiguration

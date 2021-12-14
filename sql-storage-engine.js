@@ -21,7 +21,7 @@ import path from 'path';
 
 const __dirname = (
     process.platform === 'win32' ?
-        path.dirname(decodeURI(new URL(import.meta.url).pathname)).substr(1) :
+        path.dirname(decodeURI(new URL(import.meta.url).pathname)).substring(1) :
         path.dirname(decodeURI(new URL(import.meta.url).pathname))
 );
 const SUPPORTED_DRIVERS = ['sql-server'];
@@ -581,8 +581,7 @@ class SQLStorageEngine extends BaseStorageEngine {
                 if (properties.has(col.property) === false) {
                     let def = {
                         target: col.property,
-                        type: SQLTranslator.toJSTypeName(col.dataType),
-                        nullable: col.nullable
+                        type: SQLTranslator.toJSTypeName(col.dataType)
                     };
                     if (col.keyed) {
                         def.pk = true;
@@ -590,7 +589,19 @@ class SQLStorageEngine extends BaseStorageEngine {
                     if (col.hasDefault) {
                         def.omitnull = true;
                     }
-                    if (!def.pk && def.nullable === false && !def.omitnull) {
+                    if (!col.nullable) {
+                        def.required = true;
+                    }
+                    if (col.numberPrecision) {
+                        def.precision = col.numberPrecision;
+                    }
+                    if (col.numberRadix) {
+                        def.radix = col.numberRadix;
+                    }
+                    if (col.charLength) {
+                        def.charLength = col.charLength;
+                    }
+                    if (!def.pk && def.required && !def.omitnull) {
                         switch (def.type) {
                             case 'Number': def.default = 0; break;
                             case 'String': def.default = ''; break;

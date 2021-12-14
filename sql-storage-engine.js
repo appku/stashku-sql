@@ -17,10 +17,16 @@ import SQLTypes from './sql-types.js';
 import QuerySegment from './query-segment.js';
 import SQLTranslator from './sql-translator.js';
 import fs from 'fs';
+import path from 'path';
 
+const __dirname = (
+    process.platform === 'win32' ?
+        path.dirname(decodeURI(new URL(import.meta.url).pathname)).substr(1) :
+        path.dirname(decodeURI(new URL(import.meta.url).pathname))
+);
 const SUPPORTED_DRIVERS = ['sql-server'];
-const OPTIONS_QUERY = fs.readFileSync('./templates/options.sql', 'utf8');
-const RESOURCES_QUERY = fs.readFileSync('./templates/resources.sql', 'utf8');
+const OPTIONS_QUERY = fs.readFileSync(__dirname + '/templates/options.sql', 'utf8');
+const RESOURCES_QUERY = fs.readFileSync(__dirname + '/templates/resources.sql', 'utf8');
 
 /**
  * @typedef SQLStorageAuthenticationConfiguration

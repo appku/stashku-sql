@@ -44,76 +44,76 @@ describe('#resources', () => {
 //     });
 // });
 
-// describe('#get', () => {
-//     it('gets results from the database.', async () => {
-//         let e = new SQLStorageEngine();
-//         e.configure();
-//         let results = await e.get(new GetRequest()
-//             .from('Person.Person')
-//             .properties('FirstName', 'LastName', 'Title')
-//             .where(f => f.and('FirstName', Filter.OP.STARTSWITH, 'K'))
-//             .skip(0)
-//             .take(15)
-//             .sort('LastName', 'FirstName')
-//         );
-//         e.destroy();
-//         expect(results).toBeInstanceOf(Response);
-//         expect(results.data.length).toBe(results.returned);
-//         expect(results.total).toBe(1255);
-//         expect(results.affected).toBe(0);
-//         expect(results.returned).toBe(15);
-//     });
-//     it('runs a count-only query with paging.', async () => {
-//         let e = new SQLStorageEngine();
-//         e.configure();
-//         let results = await e.get(new GetRequest()
-//             .from('Person.Person')
-//             .properties('FirstName', 'LastName', 'Title')
-//             .where(f => f.and('FirstName', Filter.OP.STARTSWITH, 'K'))
-//             .skip(0)
-//             .take(15)
-//             .count()
-//         );
-//         e.destroy();
-//         expect(results).toBeInstanceOf(Response);
-//         expect(results.data.length).toBe(0);
-//         expect(results.total).toBe(1255);
-//         expect(results.affected).toBe(0);
-//         expect(results.returned).toBe(15);
-//     });
-//     it('runs a count-only distinct query with paging.', async () => {
-//         let e = new SQLStorageEngine();
-//         e.configure();
-//         let results = await e.get(new GetRequest()
-//             .from('Person.Person')
-//             .properties('Title')
-//             .distinct()
-//             .skip(5)
-//             .take(5)
-//             .count()
-//         );
-//         e.destroy();
-//         expect(results).toBeInstanceOf(Response);
-//         expect(results.data.length).toBe(0);
-//         expect(results.total).toBe(7);
-//         expect(results.affected).toBe(0);
-//         expect(results.returned).toBe(2);
-//     });
-//     it('runs a distinct query.', async () => {
-//         let e = new SQLStorageEngine();
-//         e.configure();
-//         let results = await e.get(new GetRequest()
-//             .from('Person.Person')
-//             .properties('FirstName')
-//             .where(f => f.and('FirstName', Filter.OP.STARTSWITH, 'Ad'))
-//             .distinct()
-//         );
-//         e.destroy();
-//         expect(results).toBeInstanceOf(Response);
-//         expect(results.data.length).toBe(5);
-//         expect(results.total).toBe(5);
-//     });
-// });
+describe('#get', () => {
+    it('gets results from the database.', async () => {
+        let e = new SQLStorageEngine();
+        e.configure();
+        let results = await e.get(new GetRequest()
+            .from('Person.Person')
+            .properties('FirstName', 'LastName', 'Title')
+            .where(f => f.and('FirstName', Filter.OP.STARTSWITH, 'K'))
+            .skip(0)
+            .take(15)
+            .sort('LastName', 'FirstName')
+        );
+        e.destroy();
+        expect(results).toBeInstanceOf(Response);
+        expect(results.data.length).toBe(results.returned);
+        expect(results.total).toBe(1255);
+        expect(results.affected).toBe(0);
+        expect(results.returned).toBe(15);
+    });
+    it('runs a count-only query with paging.', async () => {
+        let e = new SQLStorageEngine();
+        e.configure();
+        let results = await e.get(new GetRequest()
+            .from('Person.Person')
+            .properties('FirstName', 'LastName', 'Title')
+            .where(f => f.and('FirstName', Filter.OP.STARTSWITH, 'K'))
+            .skip(0)
+            .take(15)
+            .count()
+        );
+        e.destroy();
+        expect(results).toBeInstanceOf(Response);
+        expect(results.data.length).toBe(0);
+        expect(results.total).toBe(1255);
+        expect(results.affected).toBe(0);
+        expect(results.returned).toBe(15);
+    });
+    it('runs a count-only distinct query with paging.', async () => {
+        let e = new SQLStorageEngine();
+        e.configure();
+        let results = await e.get(new GetRequest()
+            .from('Person.Person')
+            .properties('Title')
+            .distinct()
+            .skip(5)
+            .take(5)
+            .count()
+        );
+        e.destroy();
+        expect(results).toBeInstanceOf(Response);
+        expect(results.data.length).toBe(0);
+        expect(results.total).toBe(7);
+        expect(results.affected).toBe(0);
+        expect(results.returned).toBe(2);
+    });
+    it('runs a distinct query.', async () => {
+        let e = new SQLStorageEngine();
+        e.configure();
+        let results = await e.get(new GetRequest()
+            .from('Person.Person')
+            .properties('FirstName')
+            .where(f => f.and('FirstName', Filter.OP.STARTSWITH, 'Ad'))
+            .distinct()
+        );
+        e.destroy();
+        expect(results).toBeInstanceOf(Response);
+        expect(results.data.length).toBe(5);
+        expect(results.total).toBe(5);
+    });
+});
 
 // describe('#post', () => {
 //     it('bulk+batch loads records.', async () => {
@@ -131,7 +131,7 @@ describe('#resources', () => {
 //         let results = await e.post(new PostRequest()
 //             .to('Production.Location')
 //             .objects(rows)
-//             .meta({
+//             .headers({
 //                 batch: {
 //                     enabled: true,
 //                     size: 100
@@ -183,7 +183,7 @@ describe('#resources', () => {
 // });
 
 // describe('#put', () => {
-//     it.only('updates objects in the database.', async () => {
+//     it('updates objects in the database.', async () => {
 //         let e = new SQLStorageEngine();
 //         e.configure();
 //         let results = await e.put(new PutRequest()
@@ -238,7 +238,7 @@ describe('#resources', () => {
 // });
 
 // describe('#delete', () => {
-//     it.only('deletes objects in the database matching conditions.', async () => {
+//     it('deletes objects in the database matching conditions.', async () => {
 //         let e = new SQLStorageEngine();
 //         e.configure();
 //         let results = await e.delete(new DeleteRequest()

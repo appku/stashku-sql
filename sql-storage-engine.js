@@ -258,7 +258,8 @@ class SQLStorageEngine extends BaseStorageEngine {
         //validate
         await super.get(request);
         let meta = request.metadata;
-        if (meta.bulk) {
+        let headers = meta.headers ?? new Map();
+        if (meta.bulk || headers.get('bulk')) {
             throw new RESTError(400, 'A "get" request does not support bulk operations (only "post" requests do).');
         } else if (meta.batch) {
             throw new RESTError(400, 'A "get" request does not support batch operations (only "put" and "post" requests do).');
@@ -340,12 +341,13 @@ class SQLStorageEngine extends BaseStorageEngine {
         //validate
         await super.post(request);
         let meta = request.metadata;
+        let headers = meta.headers ?? new Map();
         let res = new Response();
-        let batch = !!(meta.batch || this.config.batch.enabled);
-        let batchSize = (this.config.batch && this.config.batch.size ? this.config.batch.size : 100);
+        let batch = !!(meta.batch || this.config.batch.enabled || headers.get('batch'));
+        let batchSize = (this.config?.batch?.size || headers.get('batch')?.size || 100);
         //build the query
-        if (meta.bulk) {
-            let columns = new Map(Object.entries(meta.bulk));
+        if (meta.bulk || headers.get('bulk')) {
+            let columns = new Map(Object.entries(meta.bulk ?? headers.get('bulk')));
             //validate columns
             for (let [c, v] of columns) {
                 if (!v.type) {
@@ -429,9 +431,11 @@ class SQLStorageEngine extends BaseStorageEngine {
             throw new RESTError(400, 'A "put" request does not support bulk operations (only "post" requests do).');
         }
         let meta = request.metadata;
+        let headers = meta.headers ?? new Map();
         let res = new Response();
         //build the query
-        let batch = !!(meta.batch || this.config.batch.enabled);
+        let batch = !!(meta.batch || this.config.batch.enabled || headers.get('batch'));
+        let batchSize = (this.config?.batch?.size || headers.get('batch')?.size || 100);
         let chunk = '';
         let counter = 0;
         for (let o of meta.objects) {
@@ -453,7 +457,7 @@ class SQLStorageEngine extends BaseStorageEngine {
             if (batch) { //batching enabled, build up a batch query.
                 chunk += SQLTranslator.raw(qs) + ';\n';
                 counter++;
-                if (counter >= this.config.batch.size) {
+                if (counter >= batchSize) {
                     //batch exec
                     let results = await this.raw(chunk);
                     res.data.push(...results.flat());
@@ -495,6 +499,7 @@ class SQLStorageEngine extends BaseStorageEngine {
             throw new RESTError(400, 'A "patch" request does not support batch operations (only "put" and "post" requests do).');
         }
         let meta = request.metadata;
+        let headers = meta.headers ?? new Map();
         let res = new Response();
         //build the query
         let emptyFilter = Filter.isEmpty(meta.where);
@@ -536,6 +541,7 @@ class SQLStorageEngine extends BaseStorageEngine {
             throw new RESTError(400, 'A "delete" request does not support batch operations (only "put" and "post" requests do).');
         }
         let meta = request.metadata;
+        let headers = meta.headers ?? new Map();
         let res = new Response();
         //build the query
         let emptyFilter = Filter.isEmpty(meta.where);

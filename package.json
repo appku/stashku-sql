@@ -4,7 +4,7 @@
     "description": "A SQL storage engine for StashKu. Allows RESTful queries to popular SQL databases.",
     "repository": {
         "type": "git",
-        "url": "git@git-going.office.append.media:append/stashku-sql.git"
+        "url": "git@github.com:appku/stashku-sql.git"
     },
     "author": "Append Media, LLC",
     "license": "SEE LICENSE IN LICENSE",

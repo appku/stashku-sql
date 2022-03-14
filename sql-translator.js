@@ -392,7 +392,7 @@ export default class SQLTranslator {
                     case Filter.OP.NOTIN:
                         if (Array.isArray(filter.value) && filter.value.length) {
                             let paramsArray = [param, ...tokenizer.tokens(filter.value.length - 1)];
-                            let qs = new QuerySegment(`${col} IN (${paramsArray.join(', ')})`);
+                            let qs = new QuerySegment(`${col} NOT IN (${paramsArray.join(', ')})`);
                             for (let x = 0; x < paramsArray.length; x++) {
                                 qs.params.set(paramsArray[x], filter.value[x]);
                             }

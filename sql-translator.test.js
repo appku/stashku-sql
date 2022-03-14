@@ -366,7 +366,7 @@ describe('.where', () => {
             );
         let segment = SQLTranslator.where(f);
         expect(segment).not.toBe(null);
-        expect(segment.segment).toBe('((([AAA] = @w0 AND [ZZZ] != @w1) OR [FirstName] LIKE @w2 + \'%\' OR [LastName] LIKE \'%\' + @w3 OR [MiddleName] LIKE \'%\' + @w4 + \'%\' OR [MiddleName] NOT LIKE \'%\' + @w5 + \'%\' OR [Price] > @w6 OR [Price] < @w7 OR [Cost] >= @w8 OR [Cost] <= @w9) AND [DateDeleted] IS NULL AND [DateCreated] IS NOT NULL AND ([FishTank] IS NULL OR LTRIM(RTRIM([FishTank])) = \'\' OR [SharkPool] IS NOT NULL AND LTRIM(RTRIM([SharkPool])) != \'\' OR [Letter] IN (@w10, @w11, @w12) OR [Number] IN (@w13, @w14, @w15, @w16)))');
+        expect(segment.segment).toBe('((([AAA] = @w0 AND [ZZZ] != @w1) OR [FirstName] LIKE @w2 + \'%\' OR [LastName] LIKE \'%\' + @w3 OR [MiddleName] LIKE \'%\' + @w4 + \'%\' OR [MiddleName] NOT LIKE \'%\' + @w5 + \'%\' OR [Price] > @w6 OR [Price] < @w7 OR [Cost] >= @w8 OR [Cost] <= @w9) AND [DateDeleted] IS NULL AND [DateCreated] IS NOT NULL AND ([FishTank] IS NULL OR LTRIM(RTRIM([FishTank])) = \'\' OR [SharkPool] IS NOT NULL AND LTRIM(RTRIM([SharkPool])) != \'\' OR [Letter] IN (@w10, @w11, @w12) OR [Number] NOT IN (@w13, @w14, @w15, @w16)))');
         expect(segment.params.get('@w0')).toBe('abc');
         expect(segment.params.get('@w1')).toBe('qqq');
         expect(segment.params.get('@w2')).toBe('john');

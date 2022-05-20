@@ -2,24 +2,42 @@
     "plugins": [
         "plugins/markdown",
         "plugins/underscore",
-        "jsdoc-plugin-intersection"
+        "jsdoc-plugin-intersection",
+        "jsdoc-plugin-typescript",
+        "jsdoc-plugin-typescript-new"
     ],
     "source": {
-        "include": ["./"],
-        "exclude": ["./node_modules", "./old", "./assets"],
+        "include": [
+            "./", "package.json"
+        ],
+        "exclude": [
+            "./node_modules",
+            "./old",
+            "./assets",
+            "./test"
+        ],
         "includePattern": ".+\\.js(doc|x)?$",
-        "excludePattern": "(^|\\/|\\\\)_"
+        "excludePattern": "(^|\\/|\\\\)(_|.+\\.test\\.+)"
+    },
+    "typescript": {
+        "moduleRoot": "./"
     },
     "opts": {
         "destination": "./docs/",
-        "recurse": true
+        "recurse": true,
+        "template": "./node_modules/@appku/jsdoc-template",
+        "encoding": "utf8"
     },
-	"templates": {
-		"cleverLinks": false,
-		"monospaceLinks": false
-	},
-	"metadata": {
-		"title": "Flight Control: Runway",
-		"logo": "logo.png"
-	}
+    "templates": {
+        "cleverLinks": false,
+        "monospaceLinks": false
+    },
+    "metadata": {
+        "title": "@AppKu/StashKu-SQL",
+        "logo": "https://avatars.githubusercontent.com/u/76977527?s=400",
+        "links": [
+            { "icon": "globe", "url": "https://appku.com" },
+            { "icon": "github", "url": "https://github.com/appku/stashku-sql" }
+        ]
+    }
 }

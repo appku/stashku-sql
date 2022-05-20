@@ -17,12 +17,11 @@
     "type": "module",
     "main": "sql-storage-engine.js",
     "scripts": {
-        "start": "node index.js",
-        "start-docs": "node cli.js ./docs",
         "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --verbose --coverage",
         "test-ci": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --verbose -ci",
-        "lint": "./node_modules/.bin/eslint ./",
-        "docs": "./node_modules/jsdoc/jsdoc.js -c jsdoc.json --readme README.md"
+        "lint": "npx eslint ./",
+        "docs": "npx jsdoc -c jsdoc.json --readme README.md",
+        "serve-docs": "npx serve ./docs"
     },
     "jest": {
         "testEnvironment": "node",
@@ -30,24 +29,20 @@
             "/node_modules/"
         ]
     },
-    "husky": {
-        "hooks": {
-            "pre-commit": "npm run test && npm run lint"
-        }
-    },
     "dependencies": {
-        "@appku/stashku": "^0.4.9",
+        "@appku/stashku": "^0.5.0",
         "rhino": "^5.5.4"
     },
     "devDependencies": {
-        "@types/jest": "^27.0.3",
-        "dotenv": "^10.0.0",
-        "eslint": "^8.4.1",
-        "eslint-plugin-jest": "^25.3.0",
-        "husky": "^4.3.0",
-        "jest": "^27.4.3",
-        "jsdoc": "^3.6.6",
-        "jsdoc-plugin-intersection": "^1.0.3",
-        "tidy-jsdoc": "^1.4.0"
+        "@appku/jsdoc-template": "^1.1.6",
+        "@types/jest": "^27.4.1",
+        "eslint": "^8.13.0",
+        "eslint-plugin-jest": "^26.1.4",
+        "jest": "^27.5.1",
+        "jsdoc": "^3.6.10",
+        "jsdoc-plugin-intersection": "^1.0.4",
+        "jsdoc-plugin-typescript": "^2.0.7",
+        "jsdoc-plugin-typescript-new": "^1.0.0",
+        "serve": "^13.0.2"
     }
 }

@@ -9,7 +9,6 @@ import StashKu, {
     Filter,
     Response,
     RESTError,
-    ModelConfiguration,
     ModelUtility
 } from '@appku/stashku';
 import rhino from 'rhino';
@@ -181,7 +180,7 @@ class SQLStorageEngine extends BaseStorageEngine {
 
     /**
      * @inheritdoc
-     * @returns {Array.<String>}
+     * @returns {Promise.<Array.<String>>}
      */
     async resources() {
         let names = await this.raw(RESOURCES_QUERY);
@@ -192,7 +191,7 @@ class SQLStorageEngine extends BaseStorageEngine {
      * Makes a raw SQL query to the configured database.
      * @param {String} query - The SQL query to run on the database.
      * @param {Object|Map} [params] - The URI parameters to include in the request.
-     * @returns {Array}
+     * @returns {Promise.<Array>}
      */
     async raw(query, params) {
         if (query) {
@@ -216,7 +215,7 @@ class SQLStorageEngine extends BaseStorageEngine {
      * @param {Map.<String, SQLBulkColumnOptions>} columns - An map of column definitions with the key as the column name.
      * @param {Array} rows - An array of rows to bulk-load.
      * @param {{checkConstraints:Boolean, fireTriggers:Boolean, keepNulls:Boolean, tableLock:Boolean}} [options] - Optional bulk-load options for the underlying driver.
-     * @returns {Number}
+     * @returns {Promise.<Number>}
      */
     async bulk(tableName, columns, rows, options) {
         if (!tableName) {
@@ -252,7 +251,7 @@ class SQLStorageEngine extends BaseStorageEngine {
     /**
      * @inheritdoc
      * @param {GetRequest} request - The GET request to send to the storage engine.
-     * @returns {Response} Returns the data objects from storage matching request criteria.
+     * @returns {Promise.<Response>} Returns the data objects from storage matching request criteria.
      */
     async get(request) {
         //validate
@@ -335,7 +334,7 @@ class SQLStorageEngine extends BaseStorageEngine {
     /**
      * @inheritdoc
      * @param {PostRequest} request - The POST request to send to the storage engine.
-     * @returns {Response} Returns the data objects from storage matching request criteria.
+     * @returns {Promise.<Response>} Returns the data objects from storage matching request criteria.
      */
     async post(request) {
         //validate
@@ -422,7 +421,7 @@ class SQLStorageEngine extends BaseStorageEngine {
     /**
      * @inheritdoc
      * @param {PutRequest} request - The PUT request to send to the storage engine.
-     * @returns {Response} Returns the data objects from storage matching request criteria.
+     * @returns {Promise.<Response>} Returns the data objects from storage matching request criteria.
      */
     async put(request) {
         //validate
@@ -488,7 +487,7 @@ class SQLStorageEngine extends BaseStorageEngine {
     /**
      * @inheritdoc
      * @param {PatchRequest} request - The PUT request to send to the storage engine.
-     * @returns {Response} Returns the data objects from storage matching request criteria.
+     * @returns {Promise.<Response>} Returns the data objects from storage matching request criteria.
      */
     async patch(request) {
         //validate
@@ -530,7 +529,7 @@ class SQLStorageEngine extends BaseStorageEngine {
     /**
      * @inheritdoc
      * @param {DeleteRequest} request - The PUT request to send to the storage engine.
-     * @returns {Response} Returns the data objects from storage matching request criteria.
+     * @returns {Promise.<Response>} Returns the data objects from storage matching request criteria.
      */
     async delete(request) {
         //validate
@@ -573,62 +572,66 @@ class SQLStorageEngine extends BaseStorageEngine {
      * @override
      * @throws 404 Error when the requested resource is has not been stored in memory.
      * @param {OptionsRequest} request - The OPTIONS request to send to the storage engine.
-     * @returns {Response} Returns a response with a single data object- the dynamically created model configuration.
+     * @returns {Promise.<Response>} Returns a response with a single data object- the dynamically created model configuration.
      */
     async options(request) {
         //validate
         await super.options(request);
         //get information
         let meta = request.metadata;
-        let properties = new Map();
-        let columns = await this.raw(OPTIONS_QUERY, { resource: meta.from });
-        if (columns && columns.length) {
-            for (let col of columns) {
-                if (properties.has(col.property) === false) {
-                    let def = {
-                        target: col.property,
-                        type: SQLTranslator.toJSTypeName(col.dataType)
-                    };
-                    if (col.keyed) {
-                        def.pk = true;
-                    }
-                    if (col.hasDefault) {
-                        def.omitnull = true;
-                    }
-                    if (!col.nullable) {
-                        def.required = true;
-                    }
-                    if (col.numberPrecision) {
-                        def.precision = col.numberPrecision;
-                    }
-                    if (col.numberRadix) {
-                        def.radix = col.numberRadix;
-                    }
-                    if (col.charLength) {
-                        def.charLength = col.charLength;
-                    }
-                    if (!def.pk && def.required && !def.omitnull) {
-                        switch (def.type) {
-                            case 'Number': def.default = 0; break;
-                            case 'String': def.default = ''; break;
-                            case 'Boolean': def.default = false; break;
-                            case 'Array': def.default = []; break;
-                            case 'Date': def.default = new Date(); break;
-                            case 'Map': def.default = new Map(); break;
-                            case 'Set': def.default = new Set(); break;
-                            case 'Buffer': def.default = Buffer.alloc(0); break;
-                            case 'ArrayBuffer': def.default = new ArrayBuffer(0); break;
-                        }
-                    }
-                    properties.set(ModelUtility.formatPropName(col.property), def);
-                }
-            }
+        let data = [];
+        let resources = [];
+        if (meta.from === '*') {
+            resources.push(...(await this.resources()));
         } else {
-            throw new RESTError(404, `The requested resource "${meta.from}" was not found.`);
+            resources.push(meta.from);
         }
-        //generate model type and return
-        let mt = ModelUtility.generateModelType(meta.from, properties, new ModelConfiguration(meta.from));
-        return new Response([mt], 1, 0, 1);
+        for (let resource of resources) {
+            let properties = new Map();
+            let columns = await this.raw(OPTIONS_QUERY, { resource: resource });
+            if (columns && columns.length) {
+                for (let col of columns) {
+                    if (properties.has(col.property) === false) {
+                        let def = {
+                            target: col.property,
+                            type: SQLTranslator.toJSTypeName(col.dataType)
+                        };
+                        if (col.keyed) {
+                            def.pk = true;
+                        }
+                        if (col.numberPrecision) {
+                            def.precision = col.numberPrecision;
+                        }
+                        if (col.numberRadix) {
+                            def.radix = col.numberRadix;
+                        }
+                        if (col.charLength) {
+                            def.charLength = col.charLength;
+                        }
+                        if (!def.pk && def.required && !col.hasDefault) {
+                            switch (def.type) {
+                                case 'Number': def.default = 0; break;
+                                case 'String': def.default = ''; break;
+                                case 'Boolean': def.default = false; break;
+                                case 'Array': def.default = []; break;
+                                case 'Date': def.default = new Date(); break;
+                                case 'Map': def.default = new Map(); break;
+                                case 'Set': def.default = new Set(); break;
+                                case 'Buffer': def.default = Buffer.alloc(0); break;
+                                case 'ArrayBuffer': def.default = new ArrayBuffer(0); break;
+                            }
+                        }
+                        properties.set(ModelUtility.formatPropName(col.property), def);
+                    }
+                }
+            } else {
+                throw new RESTError(404, `The requested resource "${resource}" was not found.`);
+            }
+            //generate model type and return
+            let mt = ModelUtility.generateModelType(resource, properties, { resource: resource });
+            data.push(mt);
+        }
+        return new Response(data, data.length, 0, data.length);
     }
 
 }

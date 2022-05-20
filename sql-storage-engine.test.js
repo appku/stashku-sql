@@ -1,6 +1,6 @@
 import SQLStorageEngine from './sql-storage-engine.js';
 import SQLTypes from './sql-types.js';
-import { GetRequest, PostRequest, PutRequest, PatchRequest, DeleteRequest, OptionsRequest, Filter, Response, ModelConfiguration } from '@appku/stashku';
+import { GetRequest, PostRequest, PutRequest, PatchRequest, DeleteRequest, OptionsRequest, Filter, Response } from '@appku/stashku';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -276,11 +276,11 @@ describe('#options', () => {
         expect(res.code).toBe(200);
         expect(res.data.length).toBe(1);
         expect(res.data[0].name).toBe('PersonPersonModel');
-        expect(res.data[0].businessEntityID.target).toBe('BusinessEntityID');
-        expect(res.data[0].businessEntityID.pk).toBeTruthy();
-        expect(res.data[0].businessEntityID.default).toBeUndefined();
-        expect(res.data[0].firstName.target).toBe('FirstName');
-        expect(res.data[0].firstName.default).toBe('');
-        expect(res.data[0].$stashku).toBeInstanceOf(ModelConfiguration);
+        expect(res.data[0].BusinessEntityID.target).toBe('BusinessEntityID');
+        expect(res.data[0].BusinessEntityID.pk).toBeTruthy();
+        expect(res.data[0].BusinessEntityID.default).toBeUndefined();
+        expect(res.data[0].FirstName.target).toBe('FirstName');
+        expect(res.data[0].FirstName.default).toBe('');
+        expect(res.data[0].$stashku).toBeTruthy();
     });
 });

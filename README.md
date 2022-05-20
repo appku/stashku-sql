@@ -151,7 +151,7 @@ You can grab and start the AdventureWorks sample database on your system in the 
 ```
 docker run -p 1433:1433 -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD={mySup3r_p4ssw0rd}' -d chriseaton/adventureworks:latest
 ```
-The password can be set to whatever you wish.
+The password can be set to whatever you wish. The docker container may take a minute to get initialized once started.
 
 You will need to set the environmental variables to match the docker container's settings, for example:
 

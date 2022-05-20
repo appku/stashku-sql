@@ -44,9 +44,9 @@ export default class SQLTranslator {
                 return 'Number';
             } else if (sqlTypeName.match(/^(?:smalldatetime|datetime.?|datetimeoffset|date|time)$/i)) {
                 return 'Date';
-            } else if (sqlTypeName.match(/^(?:binary|image|varbinary|udt)$/i)) {
+            } else if (sqlTypeName.match(/^(?:binary|image|varbinary|udt|hierarchyid)$/i)) {
                 return 'Buffer';
-            } else if (sqlTypeName.match(/^(?:bigint|n?char|n?varchar|n?text|uniqueidentifier|xml)$/i)) {
+            } else if (sqlTypeName.match(/^(?:bigint|n?char|n?varchar|n?text|uniqueidentifier|xml|geography)$/i)) {
                 return 'String';
             }
         }

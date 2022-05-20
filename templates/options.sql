@@ -36,4 +36,8 @@ SELECT
         UPPER(isc.TABLE_NAME) = UPPER(@resource)
         OR UPPER(isc.TABLE_SCHEMA + '.' + isc.TABLE_NAME) = UPPER(@resource)
         OR UPPER(isc.TABLE_CATALOG + '.' + isc.TABLE_SCHEMA + '.' + isc.TABLE_NAME) = UPPER(@resource)
+        OR UPPER('[' + isc.TABLE_SCHEMA + ']' + '.' + '[' + isc.TABLE_NAME + ']') = UPPER(@resource)
+        OR UPPER('[' + isc.TABLE_CATALOG + ']' + '.' + '[' + isc.TABLE_SCHEMA + ']' + '.' + '[' + isc.TABLE_NAME + ']') = UPPER(@resource)
+        OR UPPER(isc.TABLE_SCHEMA + '.' + '[' + isc.TABLE_NAME + ']') = UPPER(@resource)
+        OR UPPER(isc.TABLE_CATALOG + '.' + isc.TABLE_SCHEMA + '.' + '[' + isc.TABLE_NAME + ']') = UPPER(@resource)
     ORDER BY isc.TABLE_CATALOG, isc.TABLE_SCHEMA, isc.TABLE_NAME, isc.ORDINAL_POSITION;

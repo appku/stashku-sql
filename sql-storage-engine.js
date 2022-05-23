@@ -498,7 +498,6 @@ class SQLStorageEngine extends BaseStorageEngine {
             throw new RESTError(400, 'A "patch" request does not support batch operations (only "put" and "post" requests do).');
         }
         let meta = request.metadata;
-        let headers = meta.headers ?? new Map();
         let res = new Response();
         //build the query
         let emptyFilter = Filter.isEmpty(meta.where);
@@ -540,7 +539,6 @@ class SQLStorageEngine extends BaseStorageEngine {
             throw new RESTError(400, 'A "delete" request does not support batch operations (only "put" and "post" requests do).');
         }
         let meta = request.metadata;
-        let headers = meta.headers ?? new Map();
         let res = new Response();
         //build the query
         let emptyFilter = Filter.isEmpty(meta.where);
@@ -608,7 +606,7 @@ class SQLStorageEngine extends BaseStorageEngine {
                         if (col.charLength) {
                             def.charLength = col.charLength;
                         }
-                        if (!def.pk && def.required && !col.hasDefault) {
+                        if (!def.pk && !col.nullable && !col.hasDefault) {
                             switch (def.type) {
                                 case 'Number': def.default = 0; break;
                                 case 'String': def.default = ''; break;

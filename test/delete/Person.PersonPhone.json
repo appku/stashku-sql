@@ -1,0 +1,77 @@
+[
+    {
+        "BusinessEntityID": 1,
+        "PhoneNumber": "123-455-0142",
+        "PhoneNumberTypeID": 1
+    },
+    {
+        "BusinessEntityID": 2,
+        "PhoneNumber": "123-455-0175",
+        "PhoneNumberTypeID": 2
+    },
+    {
+        "BusinessEntityID": 3,
+        "PhoneNumber": "123-455-0187",
+        "PhoneNumberTypeID": 3
+    },
+    {
+        "BusinessEntityID": 4,
+        "PhoneNumber": "123-455-0100",
+        "PhoneNumberTypeID": 1
+    },
+    {
+        "BusinessEntityID": 5,
+        "PhoneNumber": "123-455-0139",
+        "PhoneNumberTypeID": 2
+    },
+    {
+        "BusinessEntityID": 6,
+        "PhoneNumber": "123-455-0189",
+        "PhoneNumberTypeID": 3
+    },
+    {
+        "BusinessEntityID": 7,
+        "PhoneNumber": "123-455-0156",
+        "PhoneNumberTypeID": 1
+    },
+    {
+        "BusinessEntityID": 8,
+        "PhoneNumber": "123-455-0138",
+        "PhoneNumberTypeID": 2
+    },
+    {
+        "BusinessEntityID": 9,
+        "PhoneNumber": "123-455-0186",
+        "PhoneNumberTypeID": 3
+    },
+    {
+        "BusinessEntityID": 10,
+        "PhoneNumber": "123-451-2568",
+        "PhoneNumberTypeID": 1
+    },
+    {
+        "BusinessEntityID": 11,
+        "PhoneNumber": "123-456-0181",
+        "PhoneNumberTypeID": 2
+    },
+    {
+        "BusinessEntityID": 12,
+        "PhoneNumber": "123-456-0183",
+        "PhoneNumberTypeID": 3
+    },
+    {
+        "BusinessEntityID": 13,
+        "PhoneNumber": "123-456-0117",
+        "PhoneNumberTypeID": 1
+    },
+    {
+        "BusinessEntityID": 14,
+        "PhoneNumber": "123-456-0156",
+        "PhoneNumberTypeID": 2
+    },
+    {
+        "BusinessEntityID": 15,
+        "PhoneNumber": "123-456-0138",
+        "PhoneNumberTypeID": 3
+    }
+]

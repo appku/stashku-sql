@@ -47,7 +47,8 @@ let sku = new StashKu({
 | ↳ `pool.min` |  | `Number` | `0` | The minimum number of connections to keep open. |
 | ↳ `pool.max` |  | `Number` | `10` | The maximum number of connections to have open at once. |
 | `model` |  | `Object` |  |
-| ↳ `model.views` | STASHKU_SQL_MODEL_VIEWS | `Boolean` | `"false"` | Optionally allows views to be modelled through OPTIONS queries. By default, only tables will be modelled and returned. This only affects OPTIONS queries. |
+| ↳ `model.tables` | STASHKU_SQL_MODEL_VIEWS | `Boolean` | `"true"` | Toggle modelling support of tables through OPTIONS queries. Table support is enabled by default. |
+| ↳ `model.views` | STASHKU_SQL_MODEL_VIEWS | `Boolean` | `"false"` | Optionally allow views to be modelled through OPTIONS queries. By default, only tables will be modelled and returned. |
 
 You can utilize environmental variables or define the values through a configuration object passed to StashKu. 
 This project also loads `.env` files in it's package directory.
@@ -65,7 +66,7 @@ For example, the following posts objects (...) to the database server in "batch"
 let res = await stash.post(r => r
     .to('dbo.Locations')
     .objects(...}
-    .meta({
+    .headers({
         batch: true,
         output: false
     });

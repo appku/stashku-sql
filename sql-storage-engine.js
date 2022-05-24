@@ -591,12 +591,20 @@ class SQLStorageEngine extends BaseStorageEngine {
             resources.push(meta.from);
         }
         let includeViews = (process.env.STASHKU_SQL_MODEL_VIEWS === 'true');
+        let includeTables = this.config?.model?.tables ?? true;
         if (this.config?.model?.views === true) {
             includeViews = true;
         }
+        if (typeof this.config?.model?.tables === 'undefined' && process.env.STASHKU_SQL_MODEL_TABLES === 'false') {
+            includeTables = false;
+        }
         for (let resource of resources) {
             let properties = new Map();
-            let columns = await this.raw(OPTIONS_QUERY, { resource: resource, views: includeViews });
+            let columns = await this.raw(OPTIONS_QUERY, {
+                resource: resource,
+                views: includeViews,
+                tables: includeTables
+            });
             if (columns && columns.length) {
                 for (let col of columns) {
                     if (properties.has(col.property) === false) {

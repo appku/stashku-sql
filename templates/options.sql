@@ -16,7 +16,15 @@ SELECT
     UPPER(isc.DATA_TYPE) AS dataType,
     isc.CHARACTER_MAXIMUM_LENGTH AS charLength,
     isc.NUMERIC_PRECISION AS numberPrecision,
-    isc.NUMERIC_PRECISION_RADIX AS numberRadix
+    isc.NUMERIC_PRECISION_RADIX AS numberRadix,
+    CAST((CASE
+        WHEN v.TABLE_SCHEMA IS NOT NULL THEN 1
+        ELSE 0
+    END) AS BIT) AS isView,
+    CAST((CASE
+        WHEN UPPER(v.IS_UPDATABLE) = 'YES' THEN 1
+        ELSE 0
+    END) AS BIT) AS isUpdatableView
     FROM INFORMATION_SCHEMA.COLUMNS isc
         LEFT JOIN INFORMATION_SCHEMA.VIEWS v ON v.TABLE_CATALOG = isc.TABLE_CATALOG AND v.TABLE_SCHEMA = isc.TABLE_SCHEMA AND v.TABLE_NAME = isc.TABLE_NAME
         OUTER APPLY (
@@ -35,6 +43,7 @@ SELECT
         ) con
     WHERE
         (@views = 1 OR v.TABLE_NAME IS NULL)
+        AND (@tables = 1 OR v.TABLE_NAME IS NOT NULL)
         AND (
             UPPER(isc.TABLE_NAME) = UPPER(@resource)
             OR UPPER(isc.TABLE_SCHEMA + '.' + isc.TABLE_NAME) = UPPER(@resource)

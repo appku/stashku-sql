@@ -3,6 +3,7 @@ import SQLTypes from './sql-types.js';
 import StashKu, { GetRequest, PostRequest, PutRequest, PatchRequest, DeleteRequest, OptionsRequest, Filter, Response } from '@appku/stashku';
 import ProductionCultureModel from './test/models/production-culture.js';
 import PurchasingVendorModel from './test/models/purchasing-vendor.js';
+import SalesCurrencyModel from './test/models/sales-currency.js';
 import fs from 'fs/promises';
 import dotenv from 'dotenv';
 
@@ -259,6 +260,7 @@ describe('#put', () => {
         return s.configure();
     });
     afterAll(async () => {
+        await s.engine.raw('UPDATE Production.Culture SET [Name] = \'Arabic\' WHERE CultureID = \'ar\';');
         return s.destroy();
     });
     it('updates objects in the database.', async () => {
@@ -286,6 +288,18 @@ describe('#put', () => {
         expect(results.data.length).toBe(results.total);
         expect(results.total).toBe(2);
     });
+    it('updates a modelled record.', async () => {
+        let m1 = new ProductionCultureModel();
+        m1.CultureID = 'ar';
+        m1.Name = 'Middle East';
+        let results = await s.model(ProductionCultureModel).put((r, m) => r.objects(m1));
+        expect(results).toBeInstanceOf(Response);
+        expect(results.data.length).toBe(results.total);
+        expect(results.data[0].Name).toBe('Middle East');
+        expect(results.total).toBe(1);
+        expect(results.affected).toBe(1);
+        expect(results.returned).toBe(1);
+    });
 });
 
 describe('#patch', () => {
@@ -296,6 +310,7 @@ describe('#patch', () => {
         return s.configure();
     });
     afterAll(async () => {
+        await s.engine.raw('UPDATE Sales.Currency SET [Name] = \'Lek\' WHERE CurrencyCode = \'ALL\';');
         return s.destroy();
     });
     it('updates objects in the database from a template.', async () => {
@@ -315,6 +330,23 @@ describe('#patch', () => {
         expect(results).toBeInstanceOf(Response);
         expect(results.data.length).toBe(results.total);
         expect(results.total).toBe(3);
+    });
+    it('updates using a modelled template.', async () => {
+        let m1 = new SalesCurrencyModel();
+        m1.Name = 'Hamburger';
+        delete m1.CurrencyCode;
+        delete m1.ModifiedDate;
+        let results = await s.model(SalesCurrencyModel).patch((r, m) => r
+            .template(m1)
+            .where(f=>f.and(m.CurrencyCode, f.OP.IN, ['ALL', 'ANY']))
+        );
+        expect(results).toBeInstanceOf(Response);
+        expect(results.data.length).toBe(results.total);
+        expect(results.data[0].CurrencyCode).toBe('ALL');
+        expect(results.data[0].Name).toBe('Hamburger');
+        expect(results.total).toBe(1);
+        expect(results.affected).toBe(1);
+        expect(results.returned).toBe(1);
     });
 });
 
@@ -376,7 +408,7 @@ describe('#options', () => {
         expect(res.data[0].name).toBe('PersonPersonModel');
         expect(res.data[0].BusinessEntityID.target).toBe('BusinessEntityID');
         expect(res.data[0].BusinessEntityID.pk).toBeTruthy();
-        expect(res.data[0].BusinessEntityID.omit).toEqual({ post: null });
+        expect(res.data[0].BusinessEntityID.omit).toEqual({ post: null, put: null });
         expect(res.data[0].BusinessEntityID.default).toBeUndefined();
         expect(res.data[0].FirstName.target).toBe('FirstName');
         expect(res.data[0].FirstName.default).toBe('');

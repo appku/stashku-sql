@@ -100,7 +100,8 @@ class BasePurchasingVendorModel extends Model {
             precision: 10,
             radix: 10,
             omit: {
-                post: null
+                post: null,
+                put: null
             }
         };
     }
@@ -128,7 +129,8 @@ class BasePurchasingVendorModel extends Model {
             target: 'ModifiedDate',
             type: 'Date',
             omit: {
-                post: null
+                post: null,
+                put: null
             }
         };
     }

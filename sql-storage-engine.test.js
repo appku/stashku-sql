@@ -1,6 +1,8 @@
 import SQLStorageEngine from './sql-storage-engine.js';
 import SQLTypes from './sql-types.js';
-import { GetRequest, PostRequest, PutRequest, PatchRequest, DeleteRequest, OptionsRequest, Filter, Response } from '@appku/stashku';
+import StashKu, { GetRequest, PostRequest, PutRequest, PatchRequest, DeleteRequest, OptionsRequest, Filter, Response } from '@appku/stashku';
+import ProductionLocationModel from './test/models/production-location.js';
+import PurchasingVendorModel from './test/models/production-location.js';
 import fs from 'fs/promises';
 import dotenv from 'dotenv';
 
@@ -133,6 +135,23 @@ describe('#get', () => {
         expect(results).toBeInstanceOf(Response);
         expect(results.data.length).toBe(5);
         expect(results.total).toBe(5);
+    });
+    it('runs a simple modelled query.', async () => {
+        let s = new StashKu({
+            engine: '@appku/stashku-sql'
+        });
+        await s.configure();
+        let results = await s.model(PurchasingVendorModel).get();
+        expect(results.affected).toBe(0);
+        expect(results.total).toBe(14);
+        expect(results.returned).toBe(14);
+        expect(results.data.length).toBe(14);
+        for (let m of results.data) {
+            expect(m).toBeInstanceOf(PurchasingVendorModel);
+            expect(m.LocationID).toBeTruthy();
+            expect(typeof m.Name).toBe('string');
+        }
+        s.destroy();
     });
 });
 

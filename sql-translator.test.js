@@ -153,6 +153,14 @@ describe('.identifier', () => {
         expect(SQLTranslator.identifier('___.####._data')).toBe('[___].[####].[_data]');
         expect(SQLTranslator.identifier('Z.äß.###')).toBe('[Z].[äß].[###]');
     });
+    it('parses a multi-segment, mixed escaped identifier.', () => {
+        expect(SQLTranslator.identifier('Look.[At].This is a Column')).toBe('[Look].[At].[This is a Column]');
+        expect(SQLTranslator.identifier('[Database].dbo.[Table]')).toBe('[Database].[dbo].[Table]');
+        expect(SQLTranslator.identifier('Database.dbo.[Table]')).toBe('[Database].[dbo].[Table]');
+        expect(SQLTranslator.identifier('[Database].dbo.Table')).toBe('[Database].[dbo].[Table]');
+        expect(SQLTranslator.identifier('Database.[dbo].Table')).toBe('[Database].[dbo].[Table]');
+        expect(SQLTranslator.identifier('[Database].[dbo].Table')).toBe('[Database].[dbo].[Table]');
+    });
 });
 
 describe('.columns', () => {

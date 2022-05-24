@@ -25,12 +25,19 @@
     },
     "jest": {
         "testEnvironment": "node",
+        "coveragePathIgnorePatterns": [
+            "/node_modules/",
+            "/test/",
+            "/docs/"
+        ],
         "testPathIgnorePatterns": [
-            "/node_modules/"
+            "/node_modules/",
+            "/test/",
+            "/docs/"
         ]
     },
     "dependencies": {
-        "@appku/stashku": "^0.5.4",
+        "@appku/stashku": "^0.5.5",
         "rhino": "^5.5.4"
     },
     "devDependencies": {

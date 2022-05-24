@@ -134,7 +134,18 @@ export default class SQLTranslator {
         } else if (name.match(/[^\p{L}A-z0-9_$@# .]/gu)) {
             throw new Error('Invalid "name" argument. The specified `field` value contains invalid/unsupported characters for SQL column names.');
         }
-        return `[${name.split('.').join('].[')}]`;
+        let segments = name.split('.');
+        for (let i = 0; i < segments.length; i++) {
+            let s = segments[i];
+            if (s.indexOf('[') !== 0) {
+                s = '[' + s;
+            }
+            if (s.indexOf(']') !== s.length - 1) {
+                s += ']';
+            }
+            segments[i] = s;
+        }
+        return segments.join('.');
     }
 
     /**

@@ -9,6 +9,7 @@ import StashKu, {
     Filter,
     Response,
     RESTError,
+    ModelGenerator,
     ModelUtility
 } from '@appku/stashku';
 import rhino from 'rhino';
@@ -644,7 +645,7 @@ class SQLStorageEngine extends BaseStorageEngine {
                                 case 'ArrayBuffer': def.default = new ArrayBuffer(0); break;
                             }
                         }
-                        properties.set(ModelUtility.formatPropName(col.property), def);
+                        properties.set(ModelGenerator.formatPropName(col.property), def);
                     }
                 }
             } else if (meta.from !== '*') {
@@ -653,7 +654,7 @@ class SQLStorageEngine extends BaseStorageEngine {
                 continue;
             }
             //generate model type and return
-            let mt = ModelUtility.generateModelType(resource, properties, { resource: resource });
+            let mt = ModelGenerator.generateModelType(resource, properties, { resource: resource });
             data.push(mt);
         }
         return new Response(data, data.length, 0, data.length);

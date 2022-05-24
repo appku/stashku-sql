@@ -18,6 +18,7 @@ SELECT
     isc.NUMERIC_PRECISION AS numberPrecision,
     isc.NUMERIC_PRECISION_RADIX AS numberRadix
     FROM INFORMATION_SCHEMA.COLUMNS isc
+        LEFT JOIN INFORMATION_SCHEMA.VIEWS v ON v.TABLE_CATALOG = isc.TABLE_CATALOG AND v.TABLE_SCHEMA = isc.TABLE_SCHEMA AND v.TABLE_NAME = isc.TABLE_NAME
         OUTER APPLY (
             SELECT TOP 1 (1) AS Keyed
                 FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc
@@ -33,11 +34,14 @@ SELECT
                     tc.CONSTRAINT_TYPE IN ('UNIQUE', 'FOREIGN KEY', 'PRIMARY KEY')
         ) con
     WHERE
-        UPPER(isc.TABLE_NAME) = UPPER(@resource)
-        OR UPPER(isc.TABLE_SCHEMA + '.' + isc.TABLE_NAME) = UPPER(@resource)
-        OR UPPER(isc.TABLE_CATALOG + '.' + isc.TABLE_SCHEMA + '.' + isc.TABLE_NAME) = UPPER(@resource)
-        OR UPPER('[' + isc.TABLE_SCHEMA + ']' + '.' + '[' + isc.TABLE_NAME + ']') = UPPER(@resource)
-        OR UPPER('[' + isc.TABLE_CATALOG + ']' + '.' + '[' + isc.TABLE_SCHEMA + ']' + '.' + '[' + isc.TABLE_NAME + ']') = UPPER(@resource)
-        OR UPPER(isc.TABLE_SCHEMA + '.' + '[' + isc.TABLE_NAME + ']') = UPPER(@resource)
-        OR UPPER(isc.TABLE_CATALOG + '.' + isc.TABLE_SCHEMA + '.' + '[' + isc.TABLE_NAME + ']') = UPPER(@resource)
+        (@views = 1 OR v.TABLE_NAME IS NULL)
+        AND (
+            UPPER(isc.TABLE_NAME) = UPPER(@resource)
+            OR UPPER(isc.TABLE_SCHEMA + '.' + isc.TABLE_NAME) = UPPER(@resource)
+            OR UPPER(isc.TABLE_CATALOG + '.' + isc.TABLE_SCHEMA + '.' + isc.TABLE_NAME) = UPPER(@resource)
+            OR UPPER('[' + isc.TABLE_SCHEMA + ']' + '.' + '[' + isc.TABLE_NAME + ']') = UPPER(@resource)
+            OR UPPER('[' + isc.TABLE_CATALOG + ']' + '.' + '[' + isc.TABLE_SCHEMA + ']' + '.' + '[' + isc.TABLE_NAME + ']') = UPPER(@resource)
+            OR UPPER(isc.TABLE_SCHEMA + '.' + '[' + isc.TABLE_NAME + ']') = UPPER(@resource)
+            OR UPPER(isc.TABLE_CATALOG + '.' + isc.TABLE_SCHEMA + '.' + '[' + isc.TABLE_NAME + ']') = UPPER(@resource)
+        )
     ORDER BY isc.TABLE_CATALOG, isc.TABLE_SCHEMA, isc.TABLE_NAME, isc.ORDINAL_POSITION;

@@ -46,6 +46,8 @@ let sku = new StashKu({
 | `pool` |  | `Object` |  |
 | ↳ `pool.min` |  | `Number` | `0` | The minimum number of connections to keep open. |
 | ↳ `pool.max` |  | `Number` | `10` | The maximum number of connections to have open at once. |
+| `model` |  | `Object` |  |
+| ↳ `model.views` | STASHKU_SQL_MODEL_VIEWS | `Boolean` | `"false"` | Optionally allows views to be modelled through OPTIONS queries. By default, only tables will be modelled and returned. This only affects OPTIONS queries. |
 
 You can utilize environmental variables or define the values through a configuration object passed to StashKu. 
 This project also loads `.env` files in it's package directory.

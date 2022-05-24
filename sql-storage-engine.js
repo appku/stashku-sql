@@ -62,6 +62,11 @@ const RESOURCES_QUERY = fs.readFileSync(__dirname + '/templates/resources.sql', 
  */
 
 /**
+ * @typedef SQLStorageConfigurationModel
+ * @property {Boolean} [views=false]
+ */
+
+/**
  * @typedef SQLStorageConfiguration
  * @property {String} driver
  * @property {String} host
@@ -72,6 +77,7 @@ const RESOURCES_QUERY = fs.readFileSync(__dirname + '/templates/resources.sql', 
  * @property {SQLStoragePoolConfiguration} pool
  * @property {SQLStorageLogConfiguration} log
  * @property {Boolean} encrypt
+ * @property {SQLStorageConfigurationModel} [model]
  */
 
 /**
@@ -584,9 +590,13 @@ class SQLStorageEngine extends BaseStorageEngine {
         } else {
             resources.push(meta.from);
         }
+        let includeViews = (process.env.STASHKU_SQL_MODEL_VIEWS === 'true');
+        if (this.config?.model?.views === true) {
+            includeViews = true;
+        }
         for (let resource of resources) {
             let properties = new Map();
-            let columns = await this.raw(OPTIONS_QUERY, { resource: resource });
+            let columns = await this.raw(OPTIONS_QUERY, { resource: resource, views: includeViews });
             if (columns && columns.length) {
                 for (let col of columns) {
                     if (properties.has(col.property) === false) {
@@ -629,8 +639,10 @@ class SQLStorageEngine extends BaseStorageEngine {
                         properties.set(ModelUtility.formatPropName(col.property), def);
                     }
                 }
-            } else {
+            } else if (meta.from !== '*') {
                 throw new RESTError(404, `The requested resource "${resource}" was not found.`);
+            } else {
+                continue;
             }
             //generate model type and return
             let mt = ModelUtility.generateModelType(resource, properties, { resource: resource });

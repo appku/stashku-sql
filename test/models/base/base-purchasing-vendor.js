@@ -98,7 +98,10 @@ class BasePurchasingVendorModel extends Model {
             type: 'Number',
             pk: true,
             precision: 10,
-            radix: 10
+            radix: 10,
+            omit: {
+                post: null
+            }
         };
     }
     
@@ -123,7 +126,10 @@ class BasePurchasingVendorModel extends Model {
     static get ModifiedDate() {
         return {
             target: 'ModifiedDate',
-            type: 'Date'
+            type: 'Date',
+            omit: {
+                post: null
+            }
         };
     }
     

@@ -1,8 +1,8 @@
 import SQLStorageEngine from './sql-storage-engine.js';
 import SQLTypes from './sql-types.js';
 import StashKu, { GetRequest, PostRequest, PutRequest, PatchRequest, DeleteRequest, OptionsRequest, Filter, Response } from '@appku/stashku';
-import ProductionLocationModel from './test/models/production-location.js';
-import PurchasingVendorModel from './test/models/production-location.js';
+import ProductionCultureModel from './test/models/production-culture.js';
+import PurchasingVendorModel from './test/models/purchasing-vendor.js';
 import fs from 'fs/promises';
 import dotenv from 'dotenv';
 
@@ -68,10 +68,17 @@ describe('#bulk', () => {
 });
 
 describe('#get', () => {
+    let s = new StashKu({
+        engine: '@appku/stashku-sql'
+    });
+    beforeAll(() => {
+        return s.configure();
+    });
+    afterAll(() => {
+        return s.destroy();
+    });
     it('gets results from the database.', async () => {
-        let e = new SQLStorageEngine();
-        e.configure();
-        let results = await e.get(new GetRequest()
+        let results = await s.engine.get(new GetRequest()
             .from('Person.Person')
             .properties('FirstName', 'LastName', 'Title')
             .where(f => f.and('FirstName', Filter.OP.STARTSWITH, 'K'))
@@ -79,7 +86,6 @@ describe('#get', () => {
             .take(15)
             .sort('LastName', 'FirstName')
         );
-        e.destroy();
         expect(results).toBeInstanceOf(Response);
         expect(results.data.length).toBe(results.returned);
         expect(results.total).toBe(1255);
@@ -87,9 +93,7 @@ describe('#get', () => {
         expect(results.returned).toBe(15);
     });
     it('runs a count-only query with paging.', async () => {
-        let e = new SQLStorageEngine();
-        e.configure();
-        let results = await e.get(new GetRequest()
+        let results = await s.engine.get(new GetRequest()
             .from('Person.Person')
             .properties('FirstName', 'LastName', 'Title')
             .where(f => f.and('FirstName', Filter.OP.STARTSWITH, 'K'))
@@ -97,7 +101,6 @@ describe('#get', () => {
             .take(15)
             .count()
         );
-        e.destroy();
         expect(results).toBeInstanceOf(Response);
         expect(results.data.length).toBe(0);
         expect(results.total).toBe(1255);
@@ -105,9 +108,7 @@ describe('#get', () => {
         expect(results.returned).toBe(15);
     });
     it('runs a count-only distinct query with paging.', async () => {
-        let e = new SQLStorageEngine();
-        e.configure();
-        let results = await e.get(new GetRequest()
+        let results = await s.engine.get(new GetRequest()
             .from('Person.Person')
             .properties('Title')
             .distinct()
@@ -115,7 +116,6 @@ describe('#get', () => {
             .take(5)
             .count()
         );
-        e.destroy();
         expect(results).toBeInstanceOf(Response);
         expect(results.data.length).toBe(0);
         expect(results.total).toBe(7);
@@ -123,45 +123,59 @@ describe('#get', () => {
         expect(results.returned).toBe(2);
     });
     it('runs a distinct query.', async () => {
-        let e = new SQLStorageEngine();
-        e.configure();
-        let results = await e.get(new GetRequest()
+        let results = await s.engine.get(new GetRequest()
             .from('Person.Person')
             .properties('FirstName')
             .where(f => f.and('FirstName', Filter.OP.STARTSWITH, 'Ad'))
             .distinct()
         );
-        e.destroy();
         expect(results).toBeInstanceOf(Response);
         expect(results.data.length).toBe(5);
         expect(results.total).toBe(5);
     });
     it('runs a simple modelled query.', async () => {
-        let s = new StashKu({
-            engine: '@appku/stashku-sql'
-        });
-        await s.configure();
         let results = await s.model(PurchasingVendorModel).get();
         expect(results.affected).toBe(0);
-        expect(results.total).toBe(14);
-        expect(results.returned).toBe(14);
-        expect(results.data.length).toBe(14);
+        expect(results.total).toBe(104);
+        expect(results.returned).toBe(104);
+        expect(results.data.length).toBe(104);
         for (let m of results.data) {
             expect(m).toBeInstanceOf(PurchasingVendorModel);
-            expect(m.LocationID).toBeTruthy();
+            expect(m.BusinessEntityID).toBeTruthy();
             expect(typeof m.Name).toBe('string');
         }
-        s.destroy();
+    });
+    it('runs a simple modelled query with constraints.', async () => {
+        let results = await s.model(PurchasingVendorModel).get((r, m) => r
+            .properties(m.Name, m.CreditRating)
+            .where(f => f.and(m.Name, f.OP.CONTAINS, 'e'))
+            .take(3)
+        );
+        expect(results.affected).toBe(0);
+        expect(results.total).toBe(95);
+        expect(results.returned).toBe(3);
+        expect(results.data.length).toBe(3);
+        for (let m of results.data) {
+            expect(m).toBeInstanceOf(PurchasingVendorModel);
+            expect(m.BusinessEntityID).toBeUndefined();
+            expect(typeof m.Name).toBe('string');
+            expect(typeof m.CreditRating).toBe('number');
+        }
     });
 });
 
 describe('#post', () => {
-    let e = new SQLStorageEngine();
-    e.configure();
+    let s = new StashKu({
+        engine: '@appku/stashku-sql'
+    });
+    beforeAll(() => {
+        return s.configure();
+    });
     afterAll(async () => {
-        await e.raw('DELETE FROM Production.Location WHERE LocationID > 60;');
-        await e.destroy();
-    }, 30000);
+        await s.engine.raw('DELETE FROM Production.Location WHERE LocationID > 60;');
+        await s.engine.raw('DELETE FROM Production.Culture WHERE ModifiedDate > \'01-01-2009\';');
+        return s.destroy();
+    });
     it('bulk+batch loads records.', async () => {
         let rows = [];
         //prep data
@@ -173,7 +187,7 @@ describe('#post', () => {
             });
         }
         //run request
-        let results = await e.post(new PostRequest()
+        let results = await s.engine.post(new PostRequest()
             .to('Production.Location')
             .objects(rows)
             .headers({
@@ -195,7 +209,7 @@ describe('#post', () => {
         expect(results.returned).toBe(0);
     }, 30000);
     it('adds new objects to the database.', async () => {
-        let results = await e.post(new PostRequest()
+        let results = await s.engine.post(new PostRequest()
             .to('Production.Location')
             .objects(
                 {
@@ -221,13 +235,34 @@ describe('#post', () => {
         expect(results.affected).toBe(3);
         expect(results.returned).toBe(3);
     });
+    it('adds modelled objects to a table', async () => {
+        let m1 = new ProductionCultureModel();
+        let m2 = new ProductionCultureModel();
+        m1.CultureID = 'az-AZ';
+        m1.Name = 'Republic of Arizona';
+        m2.CultureID = 'cs-CA';
+        m2.Name = 'The Free People of Cascadia';
+        let results = await s.model(ProductionCultureModel).post(r => r.objects(m1, m2));
+        expect(results).toBeInstanceOf(Response);
+        expect(results.data.length).toBe(results.total);
+        expect(results.total).toBe(2);
+        expect(results.affected).toBe(2);
+        expect(results.returned).toBe(2);
+    });
 });
 
 describe('#put', () => {
+    let s = new StashKu({
+        engine: '@appku/stashku-sql'
+    });
+    beforeAll(() => {
+        return s.configure();
+    });
+    afterAll(async () => {
+        return s.destroy();
+    });
     it('updates objects in the database.', async () => {
-        let e = new SQLStorageEngine();
-        e.configure();
-        let results = await e.put(new PutRequest()
+        let results = await s.engine.put(new PutRequest()
             .to('Production.Product')
             .pk('ProductID')
             .objects(
@@ -247,7 +282,6 @@ describe('#put', () => {
                 }
             )
         );
-        e.destroy();
         expect(results).toBeInstanceOf(Response);
         expect(results.data.length).toBe(results.total);
         expect(results.total).toBe(2);
@@ -255,10 +289,17 @@ describe('#put', () => {
 });
 
 describe('#patch', () => {
+    let s = new StashKu({
+        engine: '@appku/stashku-sql'
+    });
+    beforeAll(() => {
+        return s.configure();
+    });
+    afterAll(async () => {
+        return s.destroy();
+    });
     it('updates objects in the database from a template.', async () => {
-        let e = new SQLStorageEngine();
-        e.configure();
-        let results = await e.patch(new PatchRequest()
+        let results = await s.engine.patch(new PatchRequest()
             .to('Production.Product')
             .template(
                 {
@@ -271,7 +312,6 @@ describe('#patch', () => {
                 .and('ProductNumber', Filter.OP.STARTSWITH, 'CA')
             )
         );
-        e.destroy();
         expect(results).toBeInstanceOf(Response);
         expect(results.data.length).toBe(results.total);
         expect(results.total).toBe(3);
@@ -279,22 +319,24 @@ describe('#patch', () => {
 });
 
 describe('#delete', () => {
-    let e = new SQLStorageEngine();
-    e.configure();
+    let s = new StashKu({
+        engine: '@appku/stashku-sql'
+    });
     beforeAll(async () => {
+        await s.configure();
         let preload = JSON.parse(await fs.readFile('./test/delete/Person.PersonPhone.json'));
         let promises = [];
         for (let row of preload) {
-            promises.push(e.raw('INSERT INTO Person.PersonPhone (BusinessEntityID, PhoneNumber, PhoneNumberTypeID) VALUES (@BusinessEntityID, @PhoneNumber, @PhoneNumberTypeID)', row));
+            promises.push(s.engine.raw('INSERT INTO Person.PersonPhone (BusinessEntityID, PhoneNumber, PhoneNumberTypeID) VALUES (@BusinessEntityID, @PhoneNumber, @PhoneNumberTypeID)', row));
         }
         await Promise.all(promises);
     });
     afterAll(async () => {
-        await e.raw('DELETE FROM Person.PersonPhone WHERE PhoneNumber LIKE \'123-4%\';');
-        await e.destroy();
+        await s.engine.raw('DELETE FROM Person.PersonPhone WHERE PhoneNumber LIKE \'123-4%\';');
+        return s.destroy();
     });
     it('deletes objects in the database matching conditions.', async () => {
-        let results = await e.delete(new DeleteRequest()
+        let results = await s.engine.delete(new DeleteRequest()
             .from('Person.PersonPhone')
             .where(f => f
                 .and('PhoneNumber', Filter.OP.STARTSWITH, '123-456')
@@ -307,15 +349,19 @@ describe('#delete', () => {
 });
 
 describe('#options', () => {
-    let e = new SQLStorageEngine();
-    e.configure();
-    afterAll(() => {
-        e.destroy();
+    let s = new StashKu({
+        engine: '@appku/stashku-sql'
+    });
+    beforeAll(() => {
+        return s.configure();
+    });
+    afterAll(async () => {
+        return s.destroy();
     });
     it('throws a 404 when an invalid resource is specified.', async () => {
         expect.assertions(2);
         try {
-            await e.options(new OptionsRequest()
+            await s.engine.options(new OptionsRequest()
                 .from('test')
             );
         } catch (err) {
@@ -324,12 +370,13 @@ describe('#options', () => {
         }
     });
     it('returns a model type with a proper model configuration.', async () => {
-        let res = await e.options(new OptionsRequest('Person.Person'));
+        let res = await s.engine.options(new OptionsRequest('Person.Person'));
         expect(res.code).toBe(200);
         expect(res.data.length).toBe(1);
         expect(res.data[0].name).toBe('PersonPersonModel');
         expect(res.data[0].BusinessEntityID.target).toBe('BusinessEntityID');
         expect(res.data[0].BusinessEntityID.pk).toBeTruthy();
+        expect(res.data[0].BusinessEntityID.omit).toEqual({ post: null });
         expect(res.data[0].BusinessEntityID.default).toBeUndefined();
         expect(res.data[0].FirstName.target).toBe('FirstName');
         expect(res.data[0].FirstName.default).toBe('');

@@ -606,6 +606,11 @@ class SQLStorageEngine extends BaseStorageEngine {
                         if (col.charLength) {
                             def.charLength = col.charLength;
                         }
+                        if (col.keyed || col.hasDefault) {
+                            def.omit = {
+                                post: null //omit if null to let SQL handle the default
+                            };
+                        }
                         if (!def.pk && !col.nullable && !col.hasDefault) {
                             switch (def.type) {
                                 case 'Number': def.default = 0; break;

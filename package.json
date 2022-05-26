@@ -15,7 +15,7 @@
         "database"
     ],
     "type": "module",
-    "main": "sql-storage-engine.js",
+    "main": "sql-engine.js",
     "scripts": {
         "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --verbose --coverage",
         "test-ci": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --verbose -ci",
@@ -37,11 +37,11 @@
         ]
     },
     "dependencies": {
-        "@appku/stashku": "^0.5.10",
+        "@appku/stashku": "^1.0.1",
         "rhino": "^5.5.4"
     },
     "devDependencies": {
-        "@appku/jsdoc-template": "^1.1.6",
+        "@appku/jsdoc-template": "^1.1.7",
         "@types/jest": "^27.4.1",
         "eslint": "^8.13.0",
         "eslint-plugin-jest": "^26.1.4",

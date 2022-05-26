@@ -5,7 +5,7 @@ import StashKu, {
     PatchRequest,
     DeleteRequest,
     OptionsRequest,
-    BaseStorageEngine,
+    BaseEngine,
     Filter,
     Response,
     RESTError,
@@ -92,9 +92,9 @@ const toBool = (input) => !!(input === 1 || input === true || (typeof input === 
  * This StashKu engine provides an interface to SQL databases and support for all StashKu RESTful actions and
  * operations. 
  */
-class SQLStorageEngine extends BaseStorageEngine {
+class SQLEngine extends BaseEngine {
     /**
-     * Creates a new `SQLStorageEngine` instance.
+     * Creates a new `SQLEngine` instance.
      */
     constructor() {
         super('sql');
@@ -663,6 +663,6 @@ class SQLStorageEngine extends BaseStorageEngine {
 }
 
 export {
-    SQLStorageEngine as default,
+    SQLEngine as default,
     SQLTypes
 };

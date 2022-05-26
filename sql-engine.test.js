@@ -1,4 +1,4 @@
-import SQLStorageEngine from './sql-storage-engine.js';
+import SQLEngine from './sql-engine.js';
 import SQLTypes from './sql-types.js';
 import StashKu, { GetRequest, PostRequest, PutRequest, PatchRequest, DeleteRequest, OptionsRequest, Filter, Response } from '@appku/stashku';
 import ProductionCultureModel from './test/models/production-culture.js';
@@ -11,13 +11,13 @@ dotenv.config();
 
 describe('#constructor', () => {
     it('sets the engine name to "sql".', () => {
-        expect(new SQLStorageEngine().name).toBe('sql');
+        expect(new SQLEngine().name).toBe('sql');
     });
 });
 
 describe('#resources', () => {
     it('gets a list of table and view names.', async () => {
-        let e = new SQLStorageEngine();
+        let e = new SQLEngine();
         e.configure();
         let names = await e.resources();
         expect(names.length).toBeGreaterThan(0);
@@ -29,7 +29,7 @@ describe('#resources', () => {
 });
 
 describe('#raw', () => {
-    let e = new SQLStorageEngine();
+    let e = new SQLEngine();
     e.configure();
     afterAll(async () => {
         await e.destroy();
@@ -46,7 +46,7 @@ describe('#raw', () => {
 });
 
 describe('#bulk', () => {
-    let e = new SQLStorageEngine();
+    let e = new SQLEngine();
     e.configure();
     afterAll(async () => {
         await e.raw('DELETE FROM Person.ContactType WHERE ContactTypeID > 20;');

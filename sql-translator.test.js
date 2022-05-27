@@ -143,23 +143,23 @@ describe('.identifier', () => {
         expect(SQLTranslator.identifier('This is a Column')).toBe('[This is a Column]');
         expect(SQLTranslator.identifier('#SoiSThis')).toBe('[#SoiSThis]');
         expect(SQLTranslator.identifier('äßvalid')).toBe('[äßvalid]');
-        expect(SQLTranslator.identifier('_data')).toBe('[_data]');
+        expect(SQLTranslator.identifier('_data')).toBe('_data');
         expect(SQLTranslator.identifier('#####')).toBe('[#####]');
     });
     it('parses a multi-segment resource identifier.', () => {
-        expect(SQLTranslator.identifier('Look.At.This is a Column')).toBe('[Look].[At].[This is a Column]');
-        expect(SQLTranslator.identifier('#t.dbo.#SoiSThis')).toBe('[#t].[dbo].[#SoiSThis]');
-        expect(SQLTranslator.identifier('ä.resource.äßvalid')).toBe('[ä].[resource].[äßvalid]');
-        expect(SQLTranslator.identifier('___.####._data')).toBe('[___].[####].[_data]');
-        expect(SQLTranslator.identifier('Z.äß.###')).toBe('[Z].[äß].[###]');
+        expect(SQLTranslator.identifier('Look.At.This is a Column')).toBe('Look.At.[This is a Column]');
+        expect(SQLTranslator.identifier('#t.dbo.#SoiSThis')).toBe('[#t].dbo.[#SoiSThis]');
+        expect(SQLTranslator.identifier('ä.resource.äßvalid')).toBe('[ä].resource.[äßvalid]');
+        expect(SQLTranslator.identifier('___.####._data')).toBe('___.[####]._data');
+        expect(SQLTranslator.identifier('Z.äß.###')).toBe('Z.[äß].[###]');
     });
     it('parses a multi-segment, mixed escaped identifier.', () => {
-        expect(SQLTranslator.identifier('Look.[At].This is a Column')).toBe('[Look].[At].[This is a Column]');
-        expect(SQLTranslator.identifier('[Database].dbo.[Table]')).toBe('[Database].[dbo].[Table]');
-        expect(SQLTranslator.identifier('Database.dbo.[Table]')).toBe('[Database].[dbo].[Table]');
-        expect(SQLTranslator.identifier('[Database].dbo.Table')).toBe('[Database].[dbo].[Table]');
-        expect(SQLTranslator.identifier('Database.[dbo].Table')).toBe('[Database].[dbo].[Table]');
-        expect(SQLTranslator.identifier('[Database].[dbo].Table')).toBe('[Database].[dbo].[Table]');
+        expect(SQLTranslator.identifier('Look.[At].This is a Column')).toBe('Look.At.[This is a Column]');
+        expect(SQLTranslator.identifier('[Database].dbo.[Table]')).toBe('Database.dbo.Table');
+        expect(SQLTranslator.identifier('Database.dbo.[Table]')).toBe('Database.dbo.Table');
+        expect(SQLTranslator.identifier('[Database].dbo.Table')).toBe('Database.dbo.Table');
+        expect(SQLTranslator.identifier('Database.[dbo].Table')).toBe('Database.dbo.Table');
+        expect(SQLTranslator.identifier('[Database].[dbo].Table')).toBe('Database.dbo.Table');
     });
 });
 
@@ -167,7 +167,7 @@ describe('.columns', () => {
     it('translates column names to a column listing segment.', () => {
         let seg = SQLTranslator.columns('dbo.FirstName', 'Middle_Name', 'e.lastName');
         expect(seg).toBeInstanceOf(QuerySegment);
-        expect(seg.segment).toBe('[dbo].[FirstName], [Middle_Name], [e].[lastName]');
+        expect(seg.segment).toBe('dbo.FirstName, Middle_Name, e.lastName');
         expect(seg.params.size).toBe(0);
     });
     it('translates a dictionary-like object to a column listing segment.', () => {
@@ -177,7 +177,7 @@ describe('.columns', () => {
             'n.LastName': 'Doe'
         });
         expect(seg).toBeInstanceOf(QuerySegment);
-        expect(seg.segment).toBe('[FirstName], [middle name], [n].[LastName]');
+        expect(seg.segment).toBe('FirstName, [middle name], n.LastName');
         expect(seg.params.size).toBe(0);
     });
     it('translates a map to a column listing segment.', () => {
@@ -187,7 +187,7 @@ describe('.columns', () => {
             ['n.LastName', 'Doe']
         ]));
         expect(seg).toBeInstanceOf(QuerySegment);
-        expect(seg.segment).toBe('[FirstName], [middle name], [n].[LastName]');
+        expect(seg.segment).toBe('FirstName, [middle name], n.LastName');
         expect(seg.params.size).toBe(0);
     });
     it('produces an empty segment when no names are provided', () => {
@@ -266,7 +266,7 @@ describe('.columnValues', () => {
             'n.LastName': 'Doe'
         });
         expect(seg).toBeInstanceOf(QuerySegment);
-        expect(seg.segment).toBe('[FirstName] = @val0, [middle name] = @val1, [n].[LastName] = @val2');
+        expect(seg.segment).toBe('FirstName = @val0, [middle name] = @val1, n.LastName = @val2');
         expect(seg.params.size).toBe(3);
         expect(seg.params.get('@val0')).toBe('John');
         expect(seg.params.get('@val1')).toBe('R');
@@ -279,7 +279,7 @@ describe('.columnValues', () => {
             ['n.LastName', 'Doe']
         ]));
         expect(seg).toBeInstanceOf(QuerySegment);
-        expect(seg.segment).toBe('[FirstName] = @val0, [middle name] = @val1, [n].[LastName] = @val2');
+        expect(seg.segment).toBe('FirstName = @val0, [middle name] = @val1, n.LastName = @val2');
         expect(seg.params.size).toBe(3);
         expect(seg.params.get('@val0')).toBe('John');
         expect(seg.params.get('@val1')).toBe('R');
@@ -290,7 +290,7 @@ describe('.columnValues', () => {
         t.counter = 512;
         let seg = SQLTranslator.columnValues({ a: 1, b: 2, c: 3 }, t);
         expect(seg).toBeInstanceOf(QuerySegment);
-        expect(seg.segment).toBe('[a] = @z512, [b] = @z513, [c] = @z514');
+        expect(seg.segment).toBe('a = @z512, b = @z513, c = @z514');
         expect(seg.params.size).toBe(3);
         expect(seg.params.get('@z512')).toBe(1);
         expect(seg.params.get('@z513')).toBe(2);
@@ -303,7 +303,7 @@ describe('.columnValues', () => {
             'n.LastName': 'Doe'
         }, null, ['middle name']);
         expect(seg).toBeInstanceOf(QuerySegment);
-        expect(seg.segment).toBe('[FirstName] = @val0, [n].[LastName] = @val1');
+        expect(seg.segment).toBe('FirstName = @val0, n.LastName = @val1');
         expect(seg.params.size).toBe(2);
         expect(seg.params.get('@val0')).toBe('John');
         expect(seg.params.get('@val1')).toBe('Doe');
@@ -314,10 +314,10 @@ describe('.sorts', () => {
     it('translates multiple sorts.', () => {
         let qs = SQLTranslator.sorts(
             new Sort('FirstName'),
-            new Sort('LastName', Sort.DIR.DESC),
+            new Sort('Last Name', Sort.DIR.DESC),
             new Sort('Middle', Sort.DIR.ASC)
         );
-        expect(qs.segment).toBe('[FirstName], [LastName] DESC, [Middle]');
+        expect(qs.segment).toBe('FirstName, [Last Name] DESC, Middle');
     });
 });
 
@@ -347,7 +347,7 @@ describe('.where', () => {
                     .and('Hello', Filter.OP.EQUALS, 'world')
                     .and('AAA', op, v)
                 );
-                expect(seg.segment).toBe('([Hello] = @w0)');
+                expect(seg.segment).toBe('(Hello = @w0)');
                 expect(seg.params.size).toBe(1);
             }
         }
@@ -374,7 +374,7 @@ describe('.where', () => {
             );
         let segment = SQLTranslator.where(f);
         expect(segment).not.toBe(null);
-        expect(segment.segment).toBe('((([AAA] = @w0 AND [ZZZ] != @w1) OR [FirstName] LIKE @w2 + \'%\' OR [LastName] LIKE \'%\' + @w3 OR [MiddleName] LIKE \'%\' + @w4 + \'%\' OR [MiddleName] NOT LIKE \'%\' + @w5 + \'%\' OR [Price] > @w6 OR [Price] < @w7 OR [Cost] >= @w8 OR [Cost] <= @w9) AND [DateDeleted] IS NULL AND [DateCreated] IS NOT NULL AND ([FishTank] IS NULL OR LTRIM(RTRIM([FishTank])) = \'\' OR [SharkPool] IS NOT NULL AND LTRIM(RTRIM([SharkPool])) != \'\' OR [Letter] IN (@w10, @w11, @w12) OR [Number] NOT IN (@w13, @w14, @w15, @w16)))');
+        expect(segment.segment).toBe('(((AAA = @w0 AND ZZZ != @w1) OR FirstName LIKE @w2 + \'%\' OR LastName LIKE \'%\' + @w3 OR MiddleName LIKE \'%\' + @w4 + \'%\' OR MiddleName NOT LIKE \'%\' + @w5 + \'%\' OR Price > @w6 OR Price < @w7 OR Cost >= @w8 OR Cost <= @w9) AND DateDeleted IS NULL AND DateCreated IS NOT NULL AND (FishTank IS NULL OR LTRIM(RTRIM(FishTank)) = \'\' OR SharkPool IS NOT NULL AND LTRIM(RTRIM(SharkPool)) != \'\' OR Letter IN (@w10, @w11, @w12) OR Number NOT IN (@w13, @w14, @w15, @w16)))');
         expect(segment.params.get('@w0')).toBe('abc');
         expect(segment.params.get('@w1')).toBe('qqq');
         expect(segment.params.get('@w2')).toBe('john');

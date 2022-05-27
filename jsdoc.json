@@ -17,7 +17,7 @@
             "./test"
         ],
         "includePattern": ".+\\.js(doc|x)?$",
-        "excludePattern": "(^|\\/|\\\\)(_|.+\\.test\\.+)"
+        "excludePattern": "(^|\\/|\\\\)(prism|_|.+\\.test\\.+)"
     },
     "typescript": {
         "moduleRoot": "./"

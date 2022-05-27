@@ -136,12 +136,17 @@ export default class SQLTranslator {
         }
         let segments = name.split('.');
         for (let i = 0; i < segments.length; i++) {
+            //check if the segment *needs* to be escaped.
             let s = segments[i];
-            if (s.indexOf('[') !== 0) {
-                s = '[' + s;
-            }
-            if (s.indexOf(']') !== s.length - 1) {
-                s += ']';
+            if (/[^A-z0-9._]/.test(s)) {
+                if (s.indexOf('[') !== 0) {
+                    s = '[' + s;
+                }
+                if (s.indexOf(']') !== s.length - 1) {
+                    s += ']';
+                }
+            } else {
+                s = s.replace(/[[\]]/g, ''); //remove escapes
             }
             segments[i] = s;
         }

@@ -134,7 +134,7 @@ describe('#get', () => {
         expect(results.data.length).toBe(5);
         expect(results.total).toBe(5);
     });
-    it('runs a simple modelled query.', async () => {
+    it('runs a simple modeled query.', async () => {
         let results = await s.model(PurchasingVendorModel).get();
         expect(results.affected).toBe(0);
         expect(results.total).toBe(104);
@@ -146,7 +146,7 @@ describe('#get', () => {
             expect(typeof m.Name).toBe('string');
         }
     });
-    it('runs a simple modelled query with constraints.', async () => {
+    it('runs a simple modeled query with constraints.', async () => {
         let results = await s.model(PurchasingVendorModel).get((r, m) => r
             .properties(m.Name, m.CreditRating)
             .where(f => f.and(m.Name, f.OP.CONTAINS, 'e'))
@@ -236,7 +236,7 @@ describe('#post', () => {
         expect(results.affected).toBe(3);
         expect(results.returned).toBe(3);
     });
-    it('adds modelled objects to a table', async () => {
+    it('adds modeled objects to a table', async () => {
         let m1 = new ProductionCultureModel();
         let m2 = new ProductionCultureModel();
         m1.CultureID = 'az-AZ';
@@ -288,7 +288,7 @@ describe('#put', () => {
         expect(results.data.length).toBe(results.total);
         expect(results.total).toBe(2);
     });
-    it('updates a modelled record.', async () => {
+    it('updates a modeled record.', async () => {
         let m1 = new ProductionCultureModel();
         m1.CultureID = 'ar';
         m1.Name = 'Middle East';
@@ -331,7 +331,7 @@ describe('#patch', () => {
         expect(results.data.length).toBe(results.total);
         expect(results.total).toBe(3);
     });
-    it('updates using a modelled template.', async () => {
+    it('updates using a modeled template.', async () => {
         let m1 = new SalesCurrencyModel();
         m1.Name = 'Hamburger';
         delete m1.CurrencyCode;

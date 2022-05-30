@@ -53,6 +53,15 @@ let sku = new StashKu({
 You can utilize environmental variables or define the values through a configuration object passed to StashKu. 
 This project also loads `.env` files in it's package directory.
 
+##### Permissions
+Note that the OPTIONS requests may require additional permissions for the user. In Microsoft SQL Server, the user will need the "VIEW DEFINITIONS" permission in order for the engine to detect a database column default value.
+
+```sql
+GRANT VIEW DEFINITION ON <sometable> TO [someuser]
+--or
+GRANT VIEW DEFINITION ON SCHEMA::<someschema> TO [someuser]
+```
+
 #### StashKu Request Customization
 This engine supports additional StashKu request metadata, specifically:
 

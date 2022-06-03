@@ -37,8 +37,11 @@
         ]
     },
     "dependencies": {
-        "@appku/stashku": "^1.0.6",
-        "rhino": "^5.5.4"
+        "@appku/stashku": "^1.0.12"
+    },
+    "optionalDependencies": {
+        "rhino": "^5.5.4",
+        "pg": "^8.7.3"
     },
     "devDependencies": {
         "@appku/jsdoc-template": "^1.1.7",

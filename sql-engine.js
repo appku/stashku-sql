@@ -13,7 +13,7 @@ import StashKu, {
     ModelUtility
 } from '@appku/stashku';
 import rhino from 'rhino';
-import SQLTypes from './sql-types.js';
+import { SQLServerTypes, PostgresTypes } from './sql-types.js';
 import QuerySegment from './query-segment.js';
 import SQLTranslator from './sql-translator.js';
 import fs from 'fs';
@@ -358,7 +358,7 @@ class SQLEngine extends BaseEngine {
             for (let [c, v] of columns) {
                 if (!v.type) {
                     throw new RESTError(400, `The "request" bulk metadata is missing the required 'type' for column "${c}".`);
-                } else if (typeof SQLTypes[v.type] === 'undefined') {
+                } else if (typeof SQLServerTypes[v.type] === 'undefined') {
                     throw new RESTError(400, `The "request" bulk metadata contains an invalid or unsupported column type "${v.type}".`);
                 }
             }
@@ -664,5 +664,6 @@ class SQLEngine extends BaseEngine {
 
 export {
     SQLEngine as default,
-    SQLTypes
+    SQLServerTypes,
+    PostgresTypes
 };

@@ -1,7 +1,7 @@
 
-[![NPM](https://img.shields.io/npm/v/@appku/stashku)](https://npmjs.org/package/@appku/stashku)
-[![License](https://img.shields.io/npm/l/@appku/stashku)](https://npmjs.org/package/@appku/stashku)
-[![Downloads](https://img.shields.io/npm/dt/@appku/stashku)](https://npmjs.org/package/@appku/stashku)
+[![NPM](https://img.shields.io/npm/v/@appku/stashku-sql)](https://npmjs.org/package/@appku/stashku-sql)
+[![License](https://img.shields.io/npm/l/@appku/stashku-sql)](https://npmjs.org/package/@appku/stashku-sql)
+[![Downloads](https://img.shields.io/npm/dt/@appku/stashku-sql)](https://npmjs.org/package/@appku/stashku-sql)
 
 # StashKu SQL Engine
 

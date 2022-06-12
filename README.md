@@ -157,11 +157,11 @@ Run `npm run lint` to run ESLint, optionally install the Visual Studio Code ESLi
 If you are writing unit tests, you may need to `npm install @types/jest` to get intellisense in Visual Studio Code if for some reason it did not get installed.
 
 ## Setup
-This project leverages the docker image `chriseaton/adventureworks:latest` using the AdventureWorks sample database (created by Microsoft) to perform database tests.
+This project leverages the docker image `chriseaton/adventureworks:light` using the AdventureWorks sample database (created by Microsoft) to perform database tests.
 
 You can grab and start the AdventureWorks sample database on your system in the background by running:
 ```
-docker run -p 1433:1433 -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD={mySup3r_p4ssw0rd}' -d chriseaton/adventureworks:latest
+docker run -p 1433:1433 -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=mySup3r_p4ssw0rd' -d chriseaton/adventureworks:light
 ```
 The password can be set to whatever you wish. The docker container may take a minute to get initialized once started.
 
@@ -173,3 +173,6 @@ You will need to set the environmental variables to match the docker container's
 | STASHKU_SQL_DATABASE | `"AdventureWorks"` |
 | STASHKU_SQL_AUTH_USER | `"sa"` |
 | STASHKU_SQL_AUTH_PASSWORD | `"mySup3r_p4ssw0rd"` |
+
+These can also be created using `.env` files, with the name of the driver being tested, specifically:
+`driver-sql-server.env` for Microsoft SQL Server tests, and `driver-postgres.env` for Postgres tests.

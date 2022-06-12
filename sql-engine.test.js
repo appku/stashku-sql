@@ -1,5 +1,5 @@
 import SQLEngine from './sql-engine.js';
-import SQLTypes from './sql-types.js';
+import { SQLServerTypes, PostgresTypes } from './sql-types.js';
 import StashKu, { GetRequest, PostRequest, PutRequest, PatchRequest, DeleteRequest, OptionsRequest, Filter, Response } from '@appku/stashku';
 import ProductionCultureModel from './test/models/production-culture.js';
 import PurchasingVendorModel from './test/models/purchasing-vendor.js';
@@ -11,7 +11,7 @@ let drivers = ['sql-server']; //, 'postgres'];
 for (let driver of drivers) {
 
     describe(`With "${driver}" driver...`, () => {
-        beforeEach(() => {
+        beforeAll(() => {
             dotenv.config({ path: `driver-${driver}.env` });
         });
         describe('#constructor', () => {
@@ -35,7 +35,7 @@ for (let driver of drivers) {
 
         describe('#raw', () => {
             let e = new SQLEngine();
-            e.configure();
+            beforeAll(() => e.configure());
             afterAll(async () => {
                 await e.destroy();
             });
@@ -52,7 +52,7 @@ for (let driver of drivers) {
 
         describe('#bulk', () => {
             let e = new SQLEngine();
-            e.configure();
+            beforeAll(() => e.configure());
             afterAll(async () => {
                 await e.raw('DELETE FROM Person.ContactType WHERE ContactTypeID > 20;');
                 await e.destroy();
@@ -60,8 +60,8 @@ for (let driver of drivers) {
             it('bulk inserts rows into a table.', async () => {
                 let columns = new Map();
                 let rows = [];
-                columns.set('Name', { type: SQLTypes.NVarChar, nullable: false });
-                columns.set('ModifiedDate', { type: SQLTypes.DateTime, nullable: false });
+                columns.set('Name', { type: SQLServerTypes.NVarChar, nullable: false });
+                columns.set('ModifiedDate', { type: SQLServerTypes.DateTime, nullable: false });
                 for (let x = 0; x < 250; x++) {
                     rows.push({
                         Name: `Test${x}`,
@@ -74,17 +74,16 @@ for (let driver of drivers) {
         });
 
         describe('#get', () => {
-            let s = new StashKu({
-                engine: '@appku/stashku-sql'
-            });
+            let stash = null;
             beforeAll(() => {
-                return s.configure();
+                stash = new StashKu({ engine: '@appku/stashku-sql' });
             });
             afterAll(() => {
-                return s.destroy();
+                return stash.destroy();
             });
             it('gets results from the database.', async () => {
-                let results = await s.engine.get(new GetRequest()
+                await stash.engine;
+                let results = await stash.engine.get(new GetRequest()
                     .from('Person.Person')
                     .properties('FirstName', 'LastName', 'Title')
                     .where(f => f.and('FirstName', Filter.OP.STARTSWITH, 'K'))
@@ -99,7 +98,7 @@ for (let driver of drivers) {
                 expect(results.returned).toBe(15);
             });
             it('runs a count-only query with paging.', async () => {
-                let results = await s.engine.get(new GetRequest()
+                let results = await stash.engine.get(new GetRequest()
                     .from('Person.Person')
                     .properties('FirstName', 'LastName', 'Title')
                     .where(f => f.and('FirstName', Filter.OP.STARTSWITH, 'K'))
@@ -114,7 +113,7 @@ for (let driver of drivers) {
                 expect(results.returned).toBe(15);
             });
             it('runs a count-only distinct query with paging.', async () => {
-                let results = await s.engine.get(new GetRequest()
+                let results = await stash.engine.get(new GetRequest()
                     .from('Person.Person')
                     .properties('Title')
                     .distinct()
@@ -129,7 +128,7 @@ for (let driver of drivers) {
                 expect(results.returned).toBe(2);
             });
             it('runs a distinct query.', async () => {
-                let results = await s.engine.get(new GetRequest()
+                let results = await stash.engine.get(new GetRequest()
                     .from('Person.Person')
                     .properties('FirstName')
                     .where(f => f.and('FirstName', Filter.OP.STARTSWITH, 'Ad'))
@@ -140,7 +139,7 @@ for (let driver of drivers) {
                 expect(results.total).toBe(5);
             });
             it('runs a simple modeled query.', async () => {
-                let results = await s.model(PurchasingVendorModel).get();
+                let results = await stash.model(PurchasingVendorModel).get();
                 expect(results.affected).toBe(0);
                 expect(results.total).toBe(104);
                 expect(results.returned).toBe(104);
@@ -152,7 +151,7 @@ for (let driver of drivers) {
                 }
             });
             it('runs a simple modeled query with constraints.', async () => {
-                let results = await s.model(PurchasingVendorModel).get((r, m) => r
+                let results = await stash.model(PurchasingVendorModel).get((r, m) => r
                     .properties(m.Name, m.CreditRating)
                     .where(f => f.and(m.Name, f.OP.CONTAINS, 'e'))
                     .take(3)
@@ -171,16 +170,14 @@ for (let driver of drivers) {
         });
 
         describe('#post', () => {
-            let s = new StashKu({
-                engine: '@appku/stashku-sql'
-            });
+            let stash = null;
             beforeAll(() => {
-                return s.configure();
+                stash = new StashKu({ engine: '@appku/stashku-sql' });
             });
             afterAll(async () => {
-                await s.engine.raw('DELETE FROM Production.Location WHERE LocationID > 60;');
-                await s.engine.raw('DELETE FROM Production.Culture WHERE ModifiedDate > \'01-01-2009\';');
-                return s.destroy();
+                await stash.engine.raw('DELETE FROM Production.Location WHERE LocationID > 60;');
+                await stash.engine.raw('DELETE FROM Production.Culture WHERE ModifiedDate > \'01-01-2009\';');
+                return stash.destroy();
             });
             it('bulk+batch loads records.', async () => {
                 let rows = [];
@@ -193,7 +190,7 @@ for (let driver of drivers) {
                     });
                 }
                 //run request
-                let results = await s.engine.post(new PostRequest()
+                let results = await stash.engine.post(new PostRequest()
                     .to('Production.Location')
                     .objects(rows)
                     .headers({
@@ -202,9 +199,9 @@ for (let driver of drivers) {
                             size: 10
                         },
                         bulk: {
-                            Name: { type: SQLTypes.NVarChar, nullable: false },
-                            CostRate: { type: SQLTypes.SmallMoney, nullable: false },
-                            Availability: { type: SQLTypes.Decimal, nullable: false, precision: 8, scale: 2 },
+                            Name: { type: SQLServerTypes.NVarChar, nullable: false },
+                            CostRate: { type: SQLServerTypes.SmallMoney, nullable: false },
+                            Availability: { type: SQLServerTypes.Decimal, nullable: false, precision: 8, scale: 2 },
                         }
                     })
                 );
@@ -215,7 +212,7 @@ for (let driver of drivers) {
                 expect(results.returned).toBe(0);
             }, 30000);
             it('adds new objects to the database.', async () => {
-                let results = await s.engine.post(new PostRequest()
+                let results = await stash.engine.post(new PostRequest()
                     .to('Production.Location')
                     .objects(
                         {
@@ -248,7 +245,7 @@ for (let driver of drivers) {
                 m1.Name = 'Republic of Arizona';
                 m2.CultureID = 'cs-CA';
                 m2.Name = 'The Free People of Cascadia';
-                let results = await s.model(ProductionCultureModel).post(r => r.objects(m1, m2));
+                let results = await stash.model(ProductionCultureModel).post(r => r.objects(m1, m2));
                 expect(results).toBeInstanceOf(Response);
                 expect(results.data.length).toBe(results.total);
                 expect(results.total).toBe(2);
@@ -258,18 +255,16 @@ for (let driver of drivers) {
         });
 
         describe('#put', () => {
-            let s = new StashKu({
-                engine: '@appku/stashku-sql'
-            });
+            let stash = null;
             beforeAll(() => {
-                return s.configure();
+                stash = new StashKu({ engine: '@appku/stashku-sql' });
             });
             afterAll(async () => {
-                await s.engine.raw('UPDATE Production.Culture SET [Name] = \'Arabic\' WHERE CultureID = \'ar\';');
-                return s.destroy();
+                await stash.engine.raw('UPDATE Production.Culture SET [Name] = \'Arabic\' WHERE CultureID = \'ar\';');
+                return stash.destroy();
             });
             it('updates objects in the database.', async () => {
-                let results = await s.engine.put(new PutRequest()
+                let results = await stash.engine.put(new PutRequest()
                     .to('Production.Product')
                     .pk('ProductID')
                     .objects(
@@ -297,7 +292,7 @@ for (let driver of drivers) {
                 let m1 = new ProductionCultureModel();
                 m1.CultureID = 'ar';
                 m1.Name = 'Middle East';
-                let results = await s.model(ProductionCultureModel).put((r, m) => r.objects(m1));
+                let results = await stash.model(ProductionCultureModel).put((r, m) => r.objects(m1));
                 expect(results).toBeInstanceOf(Response);
                 expect(results.data.length).toBe(results.total);
                 expect(results.data[0].Name).toBe('Middle East');
@@ -308,18 +303,16 @@ for (let driver of drivers) {
         });
 
         describe('#patch', () => {
-            let s = new StashKu({
-                engine: '@appku/stashku-sql'
-            });
+            let stash = null;
             beforeAll(() => {
-                return s.configure();
+                stash = new StashKu({ engine: '@appku/stashku-sql' });
             });
             afterAll(async () => {
-                await s.engine.raw('UPDATE Sales.Currency SET [Name] = \'Lek\' WHERE CurrencyCode = \'ALL\';');
-                return s.destroy();
+                await stash.engine.raw('UPDATE Sales.Currency SET [Name] = \'Lek\' WHERE CurrencyCode = \'ALL\';');
+                return stash.destroy();
             });
             it('updates objects in the database from a template.', async () => {
-                let results = await s.engine.patch(new PatchRequest()
+                let results = await stash.engine.patch(new PatchRequest()
                     .to('Production.Product')
                     .template(
                         {
@@ -341,7 +334,7 @@ for (let driver of drivers) {
                 m1.Name = 'Hamburger';
                 delete m1.CurrencyCode;
                 delete m1.ModifiedDate;
-                let results = await s.model(SalesCurrencyModel).patch((r, m) => r
+                let results = await stash.model(SalesCurrencyModel).patch((r, m) => r
                     .template(m1)
                     .where(f => f.and(m.CurrencyCode, f.OP.IN, ['ALL', 'ANY']))
                 );
@@ -356,24 +349,23 @@ for (let driver of drivers) {
         });
 
         describe('#delete', () => {
-            let s = new StashKu({
-                engine: '@appku/stashku-sql'
-            });
+            let stash = null;
             beforeAll(async () => {
-                await s.configure();
+                stash = new StashKu({ engine: '@appku/stashku-sql' });
+                await stash.engine;
                 let preload = JSON.parse(await fs.readFile('./test/delete/Person.PersonPhone.json'));
                 let promises = [];
                 for (let row of preload) {
-                    promises.push(s.engine.raw('INSERT INTO Person.PersonPhone (BusinessEntityID, PhoneNumber, PhoneNumberTypeID) VALUES (@BusinessEntityID, @PhoneNumber, @PhoneNumberTypeID)', row));
+                    promises.push(stash.engine.raw('INSERT INTO Person.PersonPhone (BusinessEntityID, PhoneNumber, PhoneNumberTypeID) VALUES (@BusinessEntityID, @PhoneNumber, @PhoneNumberTypeID)', row));
                 }
                 await Promise.all(promises);
             });
             afterAll(async () => {
-                await s.engine.raw('DELETE FROM Person.PersonPhone WHERE PhoneNumber LIKE \'123-4%\';');
-                return s.destroy();
+                await stash.engine.raw('DELETE FROM Person.PersonPhone WHERE PhoneNumber LIKE \'123-4%\';');
+                return stash.destroy();
             });
             it('deletes objects in the database matching conditions.', async () => {
-                let results = await s.engine.delete(new DeleteRequest()
+                let results = await stash.engine.delete(new DeleteRequest()
                     .from('Person.PersonPhone')
                     .where(f => f
                         .and('PhoneNumber', Filter.OP.STARTSWITH, '123-456')
@@ -386,19 +378,17 @@ for (let driver of drivers) {
         });
 
         describe('#options', () => {
-            let s = new StashKu({
-                engine: '@appku/stashku-sql'
-            });
+            let stash = null;
             beforeAll(() => {
-                return s.configure();
+                stash = new StashKu({ engine: '@appku/stashku-sql' });
             });
             afterAll(async () => {
-                return s.destroy();
+                return stash.destroy();
             });
             it('throws a 404 when an invalid resource is specified.', async () => {
                 expect.assertions(2);
                 try {
-                    await s.engine.options(new OptionsRequest()
+                    await stash.engine.options(new OptionsRequest()
                         .from('test')
                     );
                 } catch (err) {
@@ -407,7 +397,7 @@ for (let driver of drivers) {
                 }
             });
             it('returns a model type with a proper model configuration.', async () => {
-                let res = await s.engine.options(new OptionsRequest('Person.Person'));
+                let res = await stash.engine.options(new OptionsRequest('Person.Person'));
                 expect(res.code).toBe(200);
                 expect(res.data.length).toBe(1);
                 expect(res.data[0].name).toBe('PersonPersonModel');

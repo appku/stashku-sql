@@ -166,16 +166,24 @@ class SQLEngine extends BaseEngine {
         if (this.config) {
             //we only want these properties set if they are present
             if (process.env.STASHKU_SQL_AUTH_TYPE || this.config.auth.type) {
-                driverConfig.authentication.type = this.config.auth.type || process.env.STASHKU_SQL_AUTH_TYPE;
+                this.config.auth.type =
+                    driverConfig.authentication.type =
+                    this.config.auth.type || process.env.STASHKU_SQL_AUTH_TYPE;
             }
             if (process.env.STASHKU_SQL_AUTH_USER || this.config.auth.user) {
-                driverConfig.authentication.options.userName = this.config.auth.user || process.env.STASHKU_SQL_AUTH_USER;
+                this.config.auth.user =
+                    driverConfig.authentication.options.userName =
+                    this.config.auth.user || process.env.STASHKU_SQL_AUTH_USER;
             }
             if (process.env.STASHKU_SQL_AUTH_PASSWORD || this.config.auth.password) {
-                driverConfig.authentication.options.password = this.config.auth.password || process.env.STASHKU_SQL_AUTH_PASSWORD;
+                this.config.auth.password =
+                    driverConfig.authentication.options.password =
+                    this.config.auth.password || process.env.STASHKU_SQL_AUTH_PASSWORD;
             }
             if (process.env.STASHKU_SQL_AUTH_DOMAIN || this.config.auth.domain) {
-                driverConfig.authentication.options.domain = this.config.auth.domain || process.env.STASHKU_SQL_AUTH_DOMAIN;
+                this.config.auth.domain =
+                    driverConfig.authentication.options.domain =
+                    this.config.auth.domain || process.env.STASHKU_SQL_AUTH_DOMAIN;
             }
             //merge other options
             if (this.config.options) {

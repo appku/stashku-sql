@@ -37,10 +37,10 @@
         ]
     },
     "dependencies": {
-        "@appku/stashku": "^1.0.12"
+        "@appku/stashku": "^1.0.20"
     },
     "optionalDependencies": {
-        "rhino": "^5.5.4",
+        "rhino": "^5.5.6",
         "pg": "^8.7.3"
     },
     "devDependencies": {

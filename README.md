@@ -1,4 +1,9 @@
-# StashKu SQL Storage Engine
+
+[![NPM](https://img.shields.io/npm/v/@appku/stashku)](https://npmjs.org/package/@appku/stashku)
+[![License](https://img.shields.io/npm/l/@appku/stashku)](https://npmjs.org/package/@appku/stashku)
+[![Downloads](https://img.shields.io/npm/dt/@appku/stashku)](https://npmjs.org/package/@appku/stashku)
+
+# StashKu SQL Engine
 
 ## Configuration
 This engine utilizes environmental variables and configuration objects that are passed from StashKu. StashKu will pass

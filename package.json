@@ -7,7 +7,7 @@
         "url": "git@github.com:appku/stashku-sql.git"
     },
     "author": "Append Media, LLC",
-    "license": "SEE LICENSE IN LICENSE",
+    "license": "ms-pl",
     "keywords": [
         "stashku",
         "sql",

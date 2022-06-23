@@ -39,7 +39,7 @@ SELECT
                         AND kcu.TABLE_NAME = isc.TABLE_NAME 
                         AND kcu.COLUMN_NAME = isc.COLUMN_NAME
                 WHERE 
-                    tc.CONSTRAINT_TYPE IN ('UNIQUE', 'FOREIGN KEY', 'PRIMARY KEY')
+                    tc.CONSTRAINT_TYPE = 'PRIMARY KEY' --'UNIQUE', 'FOREIGN KEY'
         ) con
     WHERE
         (@views = 1 OR v.TABLE_NAME IS NULL)

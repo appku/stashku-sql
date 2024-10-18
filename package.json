@@ -1,6 +1,6 @@
 {
     "name": "@appku/stashku-sql",
-    "version": "0.8.4",
+    "version": "0.8.5",
     "description": "A SQL storage engine for StashKu. Allows RESTful queries to popular SQL databases.",
     "repository": {
         "type": "git",

@@ -37,22 +37,22 @@
         ]
     },
     "dependencies": {
-        "@appku/stashku": "^1.0.20"
+        "@appku/stashku": "^1.1.0"
     },
     "optionalDependencies": {
         "rhino": "^5.5.6",
         "pg": "^8.7.3"
     },
     "devDependencies": {
-        "@appku/jsdoc-template": "^1.1.7",
+        "@appku/jsdoc-template": "^1.1.9",
         "@types/jest": "^27.4.1",
         "eslint": "^8.13.0",
         "eslint-plugin-jest": "^26.1.4",
         "jest": "^27.5.1",
-        "jsdoc": "^3.6.10",
+        "jsdoc": "^4.0.3",
         "jsdoc-plugin-intersection": "^1.0.4",
         "jsdoc-plugin-typescript": "^2.0.7",
         "jsdoc-plugin-typescript-new": "^1.0.0",
-        "serve": "^13.0.2"
+        "serve": "^14.2.4"
     }
 }
